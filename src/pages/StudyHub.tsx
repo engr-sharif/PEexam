@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { EXAMS, EXAM_BY_ID } from '../data/exams';
 import { lessonsForArea } from '../data/lessons';
 import { useProgress } from '../store/progress';
-import { computeAreaMastery } from '../lib/analytics';
+import { computeAreaMastery, competency } from '../lib/analytics';
 import { Card, Pill, ProgressBar } from '../components/ui';
 
 const toneFor = (id: string) =>
@@ -66,7 +66,11 @@ export function StudyHub() {
                   <div className="mt-1 text-xs text-slate-500">{area.subtopics.length} subtopics</div>
                 </div>
                 <div className="w-28 flex-shrink-0">
-                  <div className="mb-1 text-right text-xs text-slate-400">{Math.round((m?.mastery ?? 0) * 100)}%</div>
+                  <div className="mb-1 flex items-center justify-end gap-1">
+                    <Pill tone={competency(m?.mastery ?? 0, m?.attempts ?? 0).tone}>
+                      {competency(m?.mastery ?? 0, m?.attempts ?? 0).label}
+                    </Pill>
+                  </div>
                   <ProgressBar value={(m?.mastery ?? 0) * 100} tone={toneFor(exam.id)} />
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useProgress } from '../store/progress';
-import { computeReadiness, recommend, learningInsights } from '../lib/analytics';
+import { computeReadiness, recommend, learningInsights, coachMessage } from '../lib/analytics';
 import { Card, ProgressBar, Stat, Pill } from '../components/ui';
 import { EXAM_BY_ID } from '../data/exams';
 
@@ -12,6 +12,7 @@ export function Dashboard() {
   const readiness = computeReadiness(attempts, lessons);
   const recs = recommend(attempts, lessons, cards, settings.primaryExam);
   const insights = learningInsights(attempts, lessons);
+  const coach = coachMessage(attempts, lessons, cards, settings.primaryExam);
 
   const totalAttempts = attempts.length;
   const overallAcc =
@@ -27,6 +28,15 @@ export function Dashboard() {
           Your personalized path to California PE Civil licensure — Geotechnical depth, Seismic, and Surveying.
         </p>
       </header>
+
+      {/* Tutor coach */}
+      <div className="flex items-start gap-3 rounded-xl border border-brand-600/30 bg-brand-600/10 p-4">
+        <span className="text-2xl">👨‍🏫</span>
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-brand-300">Your tutor</div>
+          <p className="mt-0.5 text-sm text-slate-200">{coach}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Day streak" value={`🔥 ${streak.current}`} sub={`best: ${streak.longest}`} />

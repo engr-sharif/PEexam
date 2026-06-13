@@ -86,7 +86,10 @@ export interface Question {
   stem: string; // may contain inline html / $tex$
   choices: string[];
   answerIndex: number;
+  /** One-line takeaway shown immediately. */
   explanation: string; // may contain inline html / $tex$
+  /** Full step-by-step worked solution (the "show your work" walkthrough). */
+  solution?: ExampleStep[];
   tags?: string[];
 }
 

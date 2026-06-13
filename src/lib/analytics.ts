@@ -350,4 +350,78 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// --------------------------- Tutor / competency ----------------------------
+
+export interface Competency {
+  label: string;
+  tone: string; // ui Pill tone
+  level: number; // 0..4
+}
+
+/** Map a 0..1 mastery score to a competency level the tutor reports back. */
+export function competency(mastery: number, attempts: number): Competency {
+  if (attempts === 0) return { label: 'Not started', tone: 'slate', level: 0 };
+  if (mastery < 0.35) return { label: 'Novice', tone: 'rose', level: 1 };
+  if (mastery < 0.6) return { label: 'Developing', tone: 'amber', level: 2 };
+  if (mastery < 0.8) return { label: 'Proficient', tone: 'brand', level: 3 };
+  return { label: 'Exam-ready', tone: 'emerald', level: 4 };
+}
+
+/**
+ * Tutor-driven adaptive question set: weight toward weak, high-value areas and
+ * lean to easier items when an area is weak, harder when it is strong.
+ */
+export function pickAdaptiveQuestions(
+  attempts: Attempt[],
+  lessons: Record<string, LessonProgress>,
+  examId: string | undefined,
+  n: number,
+): typeof QUESTIONS {
+  const mastery = computeAreaMastery(attempts, lessons, examId);
+  const mById = Object.fromEntries(mastery.map((m) => [m.areaId, m]));
+  const recentIds = new Set(attempts.slice(-12).map((a) => a.questionId));
+
+  const pool = QUESTIONS.filter((q) => !examId || q.examId === examId);
+  const scored = pool.map((q) => {
+    const m = mById[q.areaId];
+    const weakness = m ? 1 - m.mastery : 1;
+    const weight = m ? m.weight : 0.1;
+    // prefer easy/medium when weak, medium/hard when strong
+    const diffScore =
+      (weakness > 0.5 && q.difficulty !== 'hard') ||
+      (weakness <= 0.5 && q.difficulty !== 'easy')
+        ? 1
+        : 0.4;
+    const freshness = recentIds.has(q.id) ? 0.15 : 1;
+    const noise = 0.6 + Math.random() * 0.8;
+    return { q, score: (0.5 + weakness) * (0.5 + weight) * diffScore * freshness * noise };
+  });
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, n)
+    .map((s) => s.q);
+}
+
+/** A short, contextual coaching line for the dashboard. */
+export function coachMessage(
+  attempts: Attempt[],
+  lessons: Record<string, LessonProgress>,
+  cards: Record<string, CardState>,
+  primaryExam: string,
+): string {
+  const due = Object.values(cards).filter((s) => isDue(s)).length;
+  if (attempts.length === 0)
+    return 'Welcome! Start with a lesson, then try a short practice quiz so I can gauge where you are.';
+  if (due >= 5) return `You have ${due} flashcards due — a quick 5-minute review will lock in those formulas.`;
+
+  const readiness = computeReadiness(attempts, lessons).find((r) => r.examId === primaryExam);
+  if (!readiness) return 'Keep practicing — every answer sharpens your study plan.';
+  const weak = readiness.weakAreas[0];
+  if (readiness.score < 40)
+    return `You're building a foundation in ${EXAM_BY_ID[primaryExam].shortName}. Focus next on ${weak?.name}.`;
+  if (readiness.score < 70)
+    return `Solid progress (${readiness.score}% ready). Your biggest lever right now is ${weak?.name}.`;
+  return `You're at ${readiness.score}% readiness — time to prove it with a timed mock exam.`;
+}
+
 export { areaById };

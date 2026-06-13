@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #020617;
+}
+
+/* lesson prose helpers */
+.prose-content ul,
+.prose-content ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose-content p + p {
+  margin-top: 0.75rem;
+}
+.prose-content b {
+  color: #e2e8f0;
+}
+
+/* KaTeX should inherit the dark theme color */
+.katex {
+  color: inherit;
+  font-size: 1.02em;
+}
+
+/* nicer range inputs */
+input[type='range'] {
+  height: 1.25rem;
+}

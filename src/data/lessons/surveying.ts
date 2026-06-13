@@ -1,0 +1,118 @@
+import type { Lesson } from '../../types';
+
+export const surveyingLessons: Lesson[] = [
+  {
+    id: 'surv-horizontal-curves',
+    examId: 'ca-surveying',
+    areaId: 'surv-construction',
+    title: 'Horizontal (Circular) Curves',
+    objective:
+      'Compute all simple-curve geometry from R and Δ (or degree of curve) and lay out stations.',
+    estMinutes: 20,
+    blocks: [
+      { kind: 'prose', html: `<p>A simple circular curve connects two tangents that intersect at the <b>PI</b> with deflection (central) angle <span class="tex">\\Delta</span>. Key points: <b>PC</b> (begin), <b>PT</b> (end). Everything follows from radius R and Δ.</p>` },
+      { kind: 'formula', tex: 'T = R\\tan\\dfrac{\\Delta}{2},\\qquad L = R\\Delta_{rad}=\\dfrac{\\pi R\\Delta}{180}', caption: 'Tangent distance and curve length' },
+      { kind: 'formula', tex: 'LC = 2R\\sin\\dfrac{\\Delta}{2},\\quad M = R\\left(1-\\cos\\dfrac{\\Delta}{2}\\right),\\quad E = R\\left(\\sec\\dfrac{\\Delta}{2}-1\\right)', caption: 'Long chord, middle ordinate, external distance' },
+      { kind: 'formula', tex: 'D_{a}=\\dfrac{5729.58}{R}\\ (\\text{arc, ft}),\\qquad R=\\dfrac{5729.58}{D}', caption: 'Degree of curve (arc definition, US practice)' },
+      { kind: 'animation', component: 'HorizontalCurve', caption: 'Drag R and Δ — watch T, L, LC, M, and E update with the geometry.' },
+      {
+        kind: 'example',
+        title: 'Stationing a curve',
+        steps: [
+          { text: 'R = 1000 ft, Δ = 24°, PI at station 45+00.00.' },
+          { text: 'Tangent:', tex: 'T=1000\\tan12^\\circ=212.56\\ \\text{ft}' },
+          { text: 'Length:', tex: 'L=\\dfrac{\\pi(1000)(24)}{180}=418.88\\ \\text{ft}' },
+          { text: 'PC = PI − T = 4500.00 − 212.56 = sta 42+87.44.' },
+          { text: 'PT = PC + L = 4287.44 + 418.88 = sta 47+06.32.' },
+        ],
+      },
+      { kind: 'callout', tone: 'warn', html: `<b>PT ≠ PI + T.</b> The curve replaces the corner, so always go PT = PC + L (along the curve), not PI + T. This is the most common stationing error.` },
+    ],
+    tips: [
+      'Deflection-angle layout: deflection to any point = (arc to point / total L)·(Δ/2).',
+      'Arc vs chord definition of degree of curve differ — US highway = arc, railroads often chord.',
+    ],
+  },
+  {
+    id: 'surv-vertical-curves',
+    examId: 'ca-surveying',
+    areaId: 'surv-construction',
+    title: 'Vertical Curves',
+    objective:
+      'Compute elevations on a parabolic vertical curve and locate the high/low point.',
+    estMinutes: 16,
+    blocks: [
+      { kind: 'prose', html: `<p>Vertical curves are <b>equal-tangent parabolas</b> joining grades g₁ and g₂ over length L (horizontal). Let A = g₂ − g₁ (algebraic grade change, in %).</p>` },
+      { kind: 'formula', tex: 'y = \\dfrac{A}{200 L}x^2', caption: 'Offset from the tangent at distance x from BVC (x, L in stations; y in ft)' },
+      { kind: 'formula', tex: 'Elev_x = Elev_{BVC} + g_1 x + \\dfrac{A}{200L}x^2', caption: 'Elevation on the curve (x from BVC)' },
+      { kind: 'formula', tex: 'x_{turn} = \\dfrac{-g_1 L}{A} = \\dfrac{g_1}{g_1-g_2}L', caption: 'Distance from BVC to the high/low point' },
+      {
+        kind: 'example',
+        title: 'Low point of a sag curve',
+        steps: [
+          { text: 'g1 = −3%, g2 = +2%, L = 500 ft (5 stations), BVC elev = 100.00 ft.' },
+          { text: 'A = g2 − g1 = 2 − (−3) = 5%.' },
+          { text: 'Turning point:', tex: 'x_{turn}=\\dfrac{-(-3)(5)}{5}=3.0\\ \\text{sta}=300\\ \\text{ft}' },
+          { text: 'Low-point elevation:', tex: 'Elev=100+(-3)(3)+\\dfrac{5}{200(5)}(3)^2=100-9+0.045\\cdot9' },
+          { text: 'Wait—use consistent station units: Elev = 100 + (−3)(3) + (5/(200·5))(3²) = 100 − 9 + 0.045 = 95.55 ft (per-station grades).' },
+        ],
+      },
+      { kind: 'callout', tone: 'tip', html: `Crest curve → high point; sag curve → low point. The turning point exists on the curve only if g₁ and g₂ have opposite signs.` },
+    ],
+    tips: ['Sight distance and headlight (sag) criteria set minimum L — know K = L/A as the design length per percent grade change.'],
+  },
+  {
+    id: 'surv-earthwork',
+    examId: 'ca-surveying',
+    areaId: 'surv-construction',
+    title: 'Earthwork Volumes',
+    objective: 'Compute volumes by the average-end-area and prismoidal methods.',
+    estMinutes: 12,
+    blocks: [
+      { kind: 'formula', tex: 'V = \\dfrac{L}{2}(A_1 + A_2)', caption: 'Average end area (L = distance between cross-sections)' },
+      { kind: 'formula', tex: 'V = \\dfrac{L}{6}(A_1 + 4A_m + A_2)', caption: 'Prismoidal formula (more accurate; Am = area at midpoint)' },
+      { kind: 'callout', tone: 'key', html: `Average-end-area <b>overestimates</b> for shapes that taper; the prismoidal correction reduces it. Don't forget <b>shrinkage/swell</b> when converting between cut, fill, and borrow (compacted) volumes.` },
+    ],
+    tips: ['1 yd³ = 27 ft³. Mass-haul diagrams balance cut and fill to minimize haul.'],
+  },
+  {
+    id: 'surv-error',
+    examId: 'ca-surveying',
+    areaId: 'surv-error',
+    title: 'Error Analysis & Traverse Closure',
+    objective:
+      'Distinguish error types, propagate error, and compute relative precision of a traverse.',
+    estMinutes: 16,
+    blocks: [
+      { kind: 'prose', html: `<p><b>Systematic</b> errors follow physical laws (correctable: temperature, sag, slope). <b>Random</b> errors are small, unavoidable, and follow normal statistics. <b>Blunders</b> (mistakes) must be found and removed.</p>` },
+      { kind: 'formula', tex: 'E_{series}=\\sqrt{e_1^2+e_2^2+\\cdots},\\qquad E_{sum}=E\\sqrt{n}', caption: 'Error propagation (random, independent)' },
+      { kind: 'formula', tex: 'LEC=\\sqrt{(\\sum\\text{lat})^2+(\\sum\\text{dep})^2},\\quad \\text{Precision}=\\dfrac{LEC}{\\text{perimeter}}', caption: 'Linear error of closure and relative precision (e.g., 1:10,000)' },
+      {
+        kind: 'example',
+        title: 'Relative precision',
+        steps: [
+          { text: 'Σlat = +0.08 ft, Σdep = −0.06 ft, total traverse length = 2480 ft.' },
+          { text: 'LEC:', tex: 'LEC=\\sqrt{0.08^2+0.06^2}=0.10\\ \\text{ft}' },
+          { text: 'Precision = 0.10/2480 = 1/24,800 ≈ 1:24,800.' },
+        ],
+      },
+      { kind: 'callout', tone: 'tip', html: `<b>Compass (Bowditch) rule</b> distributes closure proportional to leg length; <b>transit rule</b> proportional to latitude/departure. Bowditch is the default unless told otherwise.` },
+    ],
+    tips: ['Most probable value of repeated measurements = the mean; precision improves with √n.'],
+  },
+  {
+    id: 'surv-coordinates',
+    examId: 'ca-surveying',
+    areaId: 'surv-topo',
+    title: 'Coordinate Geometry, Bearings & State Plane',
+    objective: 'Convert between bearings/azimuths, compute lat/dep, and apply scale factor.',
+    estMinutes: 14,
+    blocks: [
+      { kind: 'formula', tex: '\\text{lat}=L\\cos(Az),\\qquad \\text{dep}=L\\sin(Az)', caption: 'Latitude (N–S) and departure (E–W) from azimuth' },
+      { kind: 'prose', html: `<p>Azimuths are measured clockwise from north (0–360°). Bearings are acute angles from N or S (e.g., N 45° E). Back-azimuth = azimuth ± 180°.</p>` },
+      { kind: 'formula', tex: 'D_{grid}=D_{ground}\\times CSF', caption: 'Grid distance via combined scale factor (grid × elevation factor)' },
+      { kind: 'callout', tone: 'key', html: `The <b>combined scale factor</b> = grid scale factor × elevation (sea-level) factor. State Plane (Lambert for E–W zones, Transverse Mercator for N–S) maps ground to grid coordinates.` },
+    ],
+    tips: ['Area by coordinates (shoelace): A = ½|Σ(xi·yi+1 − xi+1·yi)|. Area by DMD is the classic hand method.'],
+  },
+];

@@ -1,0 +1,98 @@
+import type { Lesson } from '../../types';
+
+export const seismicLessons: Lesson[] = [
+  {
+    id: 'seis-design-params',
+    examId: 'ca-seismic',
+    areaId: 'seis-data',
+    title: 'Seismic Design Parameters (ASCE 7-16)',
+    objective:
+      'Walk from mapped accelerations and site class to SDS, SD1, and the Seismic Design Category.',
+    estMinutes: 18,
+    blocks: [
+      { kind: 'prose', html: `<p>Every seismic problem starts here. From the mapped MCER short and 1-second spectral accelerations <span class="tex">S_S, S_1</span> and the <b>site class</b> (A–F, from Vs30), get the site coefficients <span class="tex">F_a, F_v</span>, then:</p>` },
+      { kind: 'formula', tex: 'S_{MS}=F_a S_S,\\qquad S_{M1}=F_v S_1', caption: 'Site-modified MCER accelerations' },
+      { kind: 'formula', tex: 'S_{DS}=\\tfrac{2}{3}S_{MS},\\qquad S_{D1}=\\tfrac{2}{3}S_{M1}', caption: 'Design spectral accelerations (the 2/3 design-level factor)' },
+      { kind: 'prose', html: `<p>The <b>Seismic Design Category (SDC)</b> comes from SDS, SD1, and the Risk Category (I–IV). SDC (A→F) drives permitted systems, analysis procedures, detailing, and height limits.</p>` },
+      {
+        kind: 'example',
+        title: 'From maps to SDS',
+        steps: [
+          { text: 'Ss = 1.5 g, S1 = 0.6 g, Site Class D → say Fa = 1.0, Fv = 1.5 (read from ASCE 7 tables / site-specific).' },
+          { text: 'SMS = 1.0(1.5) = 1.5 g; SM1 = 1.5(0.6) = 0.9 g.' },
+          { text: 'SDS = (2/3)(1.5) = 1.0 g; SD1 = (2/3)(0.9) = 0.6 g.', tex: 'S_{DS}=1.0g,\\ S_{D1}=0.6g' },
+        ],
+      },
+      { kind: 'callout', tone: 'warn', html: `Since ASCE 7-16 Supplement 3, <b>Site Class D default</b> may require checking both the site-specific and the larger of mapped values. Use the tables provided on your exam edition.` },
+    ],
+    tips: [
+      'Risk Category sets the Importance Factor Ie (1.0 to 1.5) and SDC thresholds — hospitals/essential = IV.',
+      'Site Class F (e.g., liquefiable, sensitive clay) generally requires a site-specific ground motion analysis.',
+    ],
+  },
+  {
+    id: 'seis-base-shear',
+    examId: 'ca-seismic',
+    areaId: 'seis-buildings',
+    title: 'Equivalent Lateral Force — Base Shear',
+    objective:
+      'Compute the ELF seismic base shear V = Cs·W and distribute it over the height.',
+    estMinutes: 22,
+    blocks: [
+      { kind: 'prose', html: `<p>The workhorse of the CA Seismic exam. Base shear:</p>` },
+      { kind: 'formula', tex: 'V = C_s W', caption: 'Seismic base shear' },
+      { kind: 'formula', tex: 'C_s=\\dfrac{S_{DS}}{R/I_e}', caption: 'Seismic response coefficient (governing value before limits)' },
+      { kind: 'formula', tex: 'C_{s,max}=\\dfrac{S_{D1}}{T(R/I_e)}\\ (T\\le T_L),\\qquad C_{s,min}=0.044 S_{DS} I_e \\ge 0.01', caption: 'Upper limit (long period) and minimum' },
+      { kind: 'prose', html: `<p>Estimate the fundamental period with the approximate formula before any limit checks:</p>` },
+      { kind: 'formula', tex: 'T_a = C_t h_n^{x}', caption: 'Approximate fundamental period (Ct, x by system; hn in ft or m per table)' },
+      { kind: 'animation', component: 'BaseShearSpectrum', caption: 'Adjust SDS, SD1, R, and T to see Cs move along the design response spectrum.' },
+      {
+        kind: 'example',
+        title: 'Base shear of a 4-story SMF',
+        steps: [
+          { text: 'SDS = 1.0 g, SD1 = 0.6 g, R = 8 (special moment frame), Ie = 1.0, W = 4000 kip, T = 0.6 s, TL = 8 s.' },
+          { text: 'Governing Cs = SDS/(R/Ie):', tex: 'C_s=1.0/8=0.125' },
+          { text: 'Max Cs = SD1/[T(R/Ie)] = 0.6/[0.6(8)] = 0.125 → tie, use 0.125.' },
+          { text: 'Min Cs = 0.044·SDS·Ie = 0.044 ≥ 0.01 ✓ (does not govern).' },
+          { text: 'Base shear:', tex: 'V=0.125(4000)=500\\ \\text{kip}' },
+        ],
+      },
+      { kind: 'prose', html: `<p>Distribute V vertically by the <b>Cvx</b> factor (weight × heightᵏ):</p>` },
+      { kind: 'formula', tex: 'F_x = C_{vx} V,\\qquad C_{vx}=\\dfrac{w_x h_x^{k}}{\\sum w_i h_i^{k}}', caption: 'Vertical distribution; k = 1 (T≤0.5s), 2 (T≥2.5s), interpolate between' },
+    ],
+    tips: [
+      'k accounts for higher-mode whip in tall/flexible buildings — k > 1 pushes more force to upper floors.',
+      'W (seismic weight) = dead load + applicable portions (e.g., 25% storage live, partitions, permanent equipment, flat-roof snow if >30 psf).',
+      'Drift is checked with Cd·δxe/Ie, NOT the elastic displacement — a classic trap.',
+    ],
+  },
+  {
+    id: 'seis-components',
+    examId: 'ca-seismic',
+    areaId: 'seis-nonbuilding',
+    title: 'Seismic Forces on Components (Fp)',
+    objective: 'Compute the design force on architectural, mechanical, and electrical components.',
+    estMinutes: 14,
+    blocks: [
+      { kind: 'formula', tex: 'F_p=\\dfrac{0.4 a_p S_{DS} W_p}{R_p/I_p}\\left(1+2\\dfrac{z}{h}\\right)', caption: 'Component seismic design force' },
+      { kind: 'formula', tex: '0.3 S_{DS} I_p W_p \\le F_p \\le 1.6 S_{DS} I_p W_p', caption: 'Lower and upper bounds on Fp' },
+      { kind: 'callout', tone: 'key', html: `The <span class="tex">(1+2z/h)</span> term means components high in the building see up to <b>3×</b> the ground-level amplification. ap = component amplification (1.0 rigid, 2.5 flexible); Rp = component response modification.` },
+    ],
+    tips: ['Anchorage of nonstructural components (especially in hospitals/Ip=1.5) is heavily tested in CA.'],
+  },
+  {
+    id: 'seis-analysis-procedures',
+    examId: 'ca-seismic',
+    areaId: 'seis-analysis',
+    title: 'Analysis Procedures & Load Combinations',
+    objective: 'Pick the permitted analysis procedure and apply seismic load combinations with overstrength.',
+    estMinutes: 16,
+    blocks: [
+      { kind: 'prose', html: `<p>Permitted procedures depend on SDC, structural irregularities, and height: <b>ELF</b>, <b>Modal Response Spectrum</b>, or <b>Response History</b>. Many regular buildings allow ELF; tall/irregular ones require modal.</p>` },
+      { kind: 'formula', tex: 'E = E_h \\pm E_v = \\rho Q_E \\pm 0.2 S_{DS} D', caption: 'Seismic load effect (horizontal + vertical)' },
+      { kind: 'formula', tex: 'E_{mh} = \\Omega_0 Q_E', caption: 'Overstrength load effect for force-controlled elements (collectors, etc.)' },
+      { kind: 'callout', tone: 'tip', html: `Use overstrength <span class="tex">\\Omega_0</span> for elements that must not yield (collectors, foundations at brittle elements). Redundancy <span class="tex">\\rho</span> is 1.0 or 1.3 depending on system redundancy.` },
+    ],
+    tips: ['LRFD seismic combo example: 1.2D + Ev + Eh + L + 0.2S → (1.2+0.2SDS)D + ρQE + L + 0.2S.'],
+  },
+];

@@ -16,6 +16,7 @@ export function MockRunner() {
   const exam = examId ? EXAM_BY_ID[examId] : undefined;
   const recordMock = useProgress((s) => s.recordMock);
   const recordAttempt = useProgress((s) => s.recordAttempt);
+  const addStudyMinutes = useProgress((s) => s.addStudyMinutes);
 
   const count = params.get('count') ? Number(params.get('count')) : undefined;
   const questions = useMemo(
@@ -110,6 +111,7 @@ export function MockRunner() {
       answers: ansSnapshot,
     };
     recordMock(r);
+    addStudyMinutes(Math.max(1, Math.round(durationMs / 60000)));
     setResult({ ...r, id: 'live', at: Date.now() });
   }
 

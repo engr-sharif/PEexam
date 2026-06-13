@@ -95,4 +95,66 @@ export const seismicLessons: Lesson[] = [
     ],
     tips: ['LRFD seismic combo example: 1.2D + Ev + Eh + L + 0.2S → (1.2+0.2SDS)D + ρQE + L + 0.2S.'],
   },
+  {
+    id: 'seis-dynamics',
+    examId: 'ca-seismic',
+    areaId: 'seis-characteristics',
+    title: 'Structural Dynamics & Response',
+    objective: 'Relate mass, stiffness, period, and damping to how a structure responds to ground shaking.',
+    estMinutes: 18,
+    blocks: [
+      { kind: 'prose', html: `<p>A building responds to an earthquake according to its <b>dynamic properties</b>. The single most important is the <b>fundamental period</b>:</p>` },
+      { kind: 'formula', tex: 'T = 2\\pi\\sqrt{\\dfrac{m}{k}} = 2\\pi\\sqrt{\\dfrac{W}{kg}}', caption: 'Natural period of a single-degree-of-freedom system' },
+      { kind: 'callout', tone: 'key', html: `More <b>mass</b> → longer period. More <b>stiffness</b> → shorter period. Short, stiff structures sit on the high-acceleration plateau of the spectrum; tall, flexible ones attract lower acceleration but larger displacement.` },
+      { kind: 'prose', html: `<p>Real structures dissipate energy through <b>damping</b> (≈5% of critical for design). The design response spectrum already bakes in 5% damping. Inelastic behavior is captured by system factors:</p>` },
+      {
+        kind: 'table',
+        headers: ['Factor', 'Meaning'],
+        rows: [
+          ['R', 'Response modification — ductility & overstrength; divides elastic demand'],
+          ['Ω0', 'Overstrength — amplifies force for elements that must stay elastic'],
+          ['Cd', 'Deflection amplification — recovers true inelastic drift from elastic analysis'],
+        ],
+      },
+      {
+        kind: 'example',
+        title: 'Period of a SDOF system',
+        steps: [
+          { text: 'W = 400 kip, k = 200 kip/in, g = 386.4 in/s².' },
+          { text: 'Mass:', tex: 'm = W/g = 400/386.4 = 1.035\\ \\text{kip·s}^2/\\text{in}' },
+          { text: 'Period:', tex: 'T = 2\\pi\\sqrt{1.035/200} = 0.45\\ \\text{s}' },
+        ],
+      },
+      { kind: 'callout', tone: 'warn', html: `<b>Resonance</b> amplifies response when the structure's period is near the dominant period of the ground motion (and of soft soil sites). Site Class E/F can push demand way up — tie this to geotechnical site response.` },
+    ],
+    tips: [
+      'A "soft story" (sudden stiffness drop) concentrates drift and is a classic collapse mechanism.',
+      'Rigid diaphragms distribute force by stiffness (with torsion); flexible diaphragms by tributary area.',
+    ],
+  },
+  {
+    id: 'seis-detailing-lesson',
+    examId: 'ca-seismic',
+    areaId: 'seis-detailing',
+    title: 'Ductile Detailing & Capacity Design',
+    objective: 'Explain capacity-design principles and the detailing that delivers ductility in each material.',
+    estMinutes: 14,
+    blocks: [
+      { kind: 'prose', html: `<p>Seismic design relies on <b>ductility</b> — the ability to deform inelastically without losing strength. <b>Capacity design</b> chooses where yielding happens and protects everything else.</p>` },
+      { kind: 'callout', tone: 'key', html: `<b>Strong-column / weak-beam:</b> force plastic hinges into beams so columns stay essentially elastic and no soft-story sidesway mechanism forms.` },
+      {
+        kind: 'table',
+        headers: ['Material', 'Ductile detailing themes'],
+        rows: [
+          ['Concrete (SMF)', 'Confinement hoops in hinge zones, strong-column/weak-beam, splice/development rules'],
+          ['Steel (SMF)', 'Prequalified moment connections, continuity plates, protected zones'],
+          ['Braced frames', 'SCBF brace slenderness/compactness; BRBF for stable hysteresis'],
+          ['Wood/masonry', 'Shear-wall nailing & hold-downs; reinforced/grouted masonry, boundary elements'],
+        ],
+      },
+      { kind: 'callout', tone: 'tip', html: `<b>Collectors/drag struts</b> and their connections are force-controlled — design with the overstrength factor <span class="tex">\\Omega_0</span> so they don't fail before the ductile system yields.` },
+      { kind: 'prose', html: `<p><b>Special inspection</b> and construction QA are mandatory for seismic-force-resisting systems in higher SDCs — welding, bolting, reinforcement placement, and anchorage are all verified.</p>` },
+    ],
+    tips: ['Nonstructural anchorage (especially Ip = 1.5 in hospitals) is heavily tested in California.'],
+  },
 ];

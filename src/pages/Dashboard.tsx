@@ -2,7 +2,15 @@ import { Link } from 'react-router-dom';
 import { useProgress } from '../store/progress';
 import { computeReadiness, recommend, learningInsights, coachMessage } from '../lib/analytics';
 import { Card, ProgressBar, Stat, Pill } from '../components/ui';
+import { StudyTimer } from '../components/StudyTimer';
 import { EXAM_BY_ID } from '../data/exams';
+
+function daysUntil(dateStr?: string): number | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
 
 const toneFor = (id: string) =>
   id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
@@ -43,6 +51,39 @@ export function Dashboard() {
         <Stat label="Questions done" value={totalAttempts} sub={`${overallAcc}% correct`} />
         <Stat label="Mock exams" value={mocks.length} sub="timed simulations" />
         <Stat label="Daily goal" value={`${settings.dailyGoalMinutes}m`} sub="study target" />
+      </div>
+
+      {/* Tools: timer + exam countdown */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <StudyTimer />
+        <Card>
+          <div className="text-xs uppercase tracking-wide text-slate-400">Exam countdown</div>
+          {(() => {
+            const dated = readiness
+              .map((r) => ({ r, d: daysUntil(settings.examDates[r.examId]) }))
+              .filter((x) => x.d !== null) as { r: (typeof readiness)[number]; d: number }[];
+            if (dated.length === 0)
+              return (
+                <p className="mt-2 text-sm text-slate-400">
+                  Set your exam dates in <Link to="/settings" className="text-brand-400 hover:underline">Settings</Link> to see a countdown and pacing.
+                </p>
+              );
+            return (
+              <div className="mt-2 space-y-2">
+                {dated
+                  .sort((a, b) => a.d - b.d)
+                  .map(({ r, d }) => (
+                    <div key={r.examId} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-300">{EXAM_BY_ID[r.examId].shortName}</span>
+                      <span className={`font-bold ${d <= 14 ? 'text-rose-300' : d <= 45 ? 'text-amber-300' : 'text-slate-200'}`}>
+                        {d > 0 ? `${d} days` : d === 0 ? 'Today!' : 'Past'}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            );
+          })()}
+        </Card>
       </div>
 
       {/* Exam readiness */}

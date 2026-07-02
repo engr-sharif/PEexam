@@ -76,6 +76,24 @@ export function Settings() {
       </Card>
 
       <Card>
+        <h2 className="mb-1 text-sm font-semibold text-slate-200">Exam dates</h2>
+        <p className="mb-3 text-xs text-slate-400">Set your scheduled dates to get a countdown and pacing on the dashboard.</p>
+        <div className="space-y-3">
+          {EXAMS.map((e) => (
+            <label key={e.id} className="flex items-center justify-between gap-3 text-sm text-slate-300">
+              <span>{e.shortName}</span>
+              <input
+                type="date"
+                value={settings.examDates[e.id] ?? ''}
+                onChange={(ev) => updateSettings({ examDates: { ...settings.examDates, [e.id]: ev.target.value } })}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100"
+              />
+            </label>
+          ))}
+        </div>
+      </Card>
+
+      <Card>
         <h2 className="mb-3 text-sm font-semibold text-slate-200">Backup & restore</h2>
         <div className="flex flex-wrap gap-2">
           <button onClick={download} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white">

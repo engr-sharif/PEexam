@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EXAMS, EXAM_BY_ID, areaById } from '../data/exams';
 import { QUESTIONS } from '../data/questions';
@@ -10,7 +10,7 @@ import type { Question } from '../types';
 
 export function Practice() {
   const [params, setParams] = useSearchParams();
-  const { attempts, lessons, recordAttempt } = useProgress();
+  const { attempts, lessons, recordAttempt, addStudyMinutes } = useProgress();
 
   const examFilter = params.get('exam') ?? '';
   const areaFilter = params.get('area') ?? '';
@@ -19,6 +19,7 @@ export function Practice() {
   const [quiz, setQuiz] = useState<Question[] | null>(null);
   const [pos, setPos] = useState(0);
   const [score, setScore] = useState(0);
+  const quizStart = useRef(0);
 
   const available = useMemo(
     () =>
@@ -37,6 +38,7 @@ export function Practice() {
     setQuiz(set);
     setPos(0);
     setScore(0);
+    quizStart.current = Date.now();
   };
 
   const setExam = (e: string) => {
@@ -98,7 +100,12 @@ export function Practice() {
           }}
         />
         <button
-          onClick={() => setPos((p) => p + 1)}
+          onClick={() => {
+            if (pos + 1 >= quiz.length) {
+              addStudyMinutes(Math.max(1, Math.round((Date.now() - quizStart.current) / 60000)));
+            }
+            setPos((p) => p + 1);
+          }}
           className="w-full rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:border-slate-500 sm:w-auto"
         >
           {pos + 1 >= quiz.length ? 'Finish →' : 'Next question →'}

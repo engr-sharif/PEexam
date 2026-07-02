@@ -47,6 +47,8 @@ export interface Settings {
   dailyGoalMinutes: number;
   primaryExam: string;
   showTimerWarnings: boolean;
+  /** Target exam dates, keyed by examId (YYYY-MM-DD). */
+  examDates: Record<string, string>;
 }
 
 export interface Streak {
@@ -97,6 +99,7 @@ const DEFAULT_SETTINGS: Settings = {
   dailyGoalMinutes: 45,
   primaryExam: 'pe-geotech',
   showTimerWarnings: true,
+  examDates: {},
 };
 
 export const useProgress = create<ProgressState>()(

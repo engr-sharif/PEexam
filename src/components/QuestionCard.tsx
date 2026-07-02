@@ -5,6 +5,7 @@ import { RichText } from './Tex';
 import { SolutionSteps } from './Blocks';
 import { lessonsForArea } from '../data/lessons';
 import { areaById } from '../data/exams';
+import { choiceOrder, answerLetter } from '../lib/choiceOrder';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -53,9 +54,10 @@ export function QuestionCard({
       <RichText html={q.stem} className="text-slate-100" />
 
       <div className="mt-4 space-y-2">
-        {q.choices.map((choice, i) => {
-          const isAnswer = i === q.answerIndex;
-          const isChosen = i === chosen;
+        {choiceOrder(q).map((origIdx, dispIdx) => {
+          const choice = q.choices[origIdx];
+          const isAnswer = origIdx === q.answerIndex;
+          const isChosen = origIdx === chosen;
           let cls = 'border-slate-700 hover:border-slate-500 active:bg-slate-800';
           if (revealed) {
             if (isAnswer) cls = 'border-emerald-500 bg-emerald-500/10';
@@ -66,13 +68,13 @@ export function QuestionCard({
           }
           return (
             <button
-              key={i}
+              key={origIdx}
               disabled={revealed}
-              onClick={() => setChosen(i)}
+              onClick={() => setChosen(origIdx)}
               className={`flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left text-sm transition sm:px-4 sm:py-2.5 ${cls}`}
             >
               <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">
-                {LETTERS[i]}
+                {LETTERS[dispIdx]}
               </span>
               <RichText html={choice} className="text-slate-200" />
             </button>
@@ -93,7 +95,7 @@ export function QuestionCard({
           <div className="mt-4 space-y-3">
             <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
               <div className={`mb-1 text-sm font-semibold ${correct ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {correct ? '✓ Correct' : `✗ Not quite — the answer is ${LETTERS[q.answerIndex]}`}
+                {correct ? '✓ Correct' : `✗ Not quite — the answer is ${answerLetter(q)}`}
               </div>
               <RichText html={q.explanation} className="text-sm leading-relaxed text-slate-300" />
             </div>

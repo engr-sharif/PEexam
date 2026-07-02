@@ -6,7 +6,7 @@ import { computeAreaMastery, competency } from '../lib/analytics';
 import { Card, Pill, ProgressBar } from '../components/ui';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function StudyHub() {
   const { examId } = useParams();
@@ -20,7 +20,7 @@ export function StudyHub() {
           <h1 className="text-2xl font-bold">Study</h1>
           <p className="text-sm text-slate-400">Pick an exam to see its knowledge-area study plan.</p>
         </header>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {EXAMS.map((e) => (
             <Link key={e.id} to={`/study/${e.id}`}>
               <Card className="h-full transition hover:border-brand-600/60">

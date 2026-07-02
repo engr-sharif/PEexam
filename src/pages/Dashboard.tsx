@@ -14,7 +14,7 @@ function daysUntil(dateStr?: string): number | null {
 }
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function Dashboard() {
   const { attempts, lessons, cards, settings, streak, mocks } = useProgress();
@@ -157,7 +157,7 @@ export function Dashboard() {
       {/* Exam readiness */}
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Exam readiness</h2>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {readiness.map((r) => (
             <Card key={r.examId}>
               <div className="flex items-center justify-between">

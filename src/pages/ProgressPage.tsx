@@ -13,7 +13,7 @@ const ERROR_LABELS: Record<string, string> = {
 };
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function ProgressPage() {
   const { attempts, lessons, mocks, minutesByDay, streak, cards, settings } = useProgress();

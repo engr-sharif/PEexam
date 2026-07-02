@@ -8,6 +8,7 @@ const registry: Record<string, ComponentType> = {
   StressProfile: lazy(() => import('./StressProfile')),
   ConsolidationCurve: lazy(() => import('./ConsolidationCurve')),
   VerticalCurveViz: lazy(() => import('./VerticalCurveViz')),
+  OpenChannel: lazy(() => import('./OpenChannel')),
 };
 
 export function Animation({ name }: { name: string }) {

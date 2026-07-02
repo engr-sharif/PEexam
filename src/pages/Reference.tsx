@@ -6,7 +6,7 @@ import { Card, Pill } from '../components/ui';
 import type { ExamId } from '../types';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function Reference() {
   const [exam, setExam] = useState<ExamId | ''>('');

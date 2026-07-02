@@ -22,7 +22,7 @@ export interface SolverStep {
 
 export interface Solver {
   id: string;
-  category: 'Geotechnical' | 'Seismic' | 'Surveying';
+  category: 'Geotechnical' | 'Water/Enviro' | 'Seismic' | 'Surveying';
   title: string;
   description: string;
   inputs: SolverInput[];
@@ -222,6 +222,127 @@ export const SOLVERS: Solver[] = [
     },
   },
 
+
+  // ------------------------------ WATER / ENVIRO ------------------------------
+  {
+    id: 'sv-manning',
+    category: 'Water/Enviro',
+    title: "Manning's equation (trapezoidal)",
+    description: 'Normal flow, velocity, and Froude number for a trapezoidal (or rectangular, z=0) channel. USCS units.',
+    inputs: [
+      { key: 'b', label: 'Bottom width b', unit: 'ft', default: 6, min: 0.5, max: 30, step: 0.5 },
+      { key: 'z', label: 'Side slope z (H:V)', default: 2, min: 0, max: 4, step: 0.5 },
+      { key: 'y', label: 'Depth y', unit: 'ft', default: 2, min: 0.2, max: 12, step: 0.1 },
+      { key: 'n', label: 'Manning n', default: 0.013, min: 0.01, max: 0.06, step: 0.001 },
+      { key: 'S', label: 'Slope S', unit: 'ft/ft', default: 0.002, min: 0.0001, max: 0.05, step: 0.0005 },
+    ],
+    compute: ({ b, z, y, n, S }) => {
+      const A = (b + z * y) * y;
+      const P = b + 2 * y * Math.sqrt(1 + z * z);
+      const R = A / P;
+      const V = (1.49 / n) * Math.pow(R, 2 / 3) * Math.sqrt(S);
+      const Q = V * A;
+      const T = b + 2 * z * y;
+      const Fr = V / Math.sqrt((32.2 * A) / T);
+      return [
+        { label: 'Geometry', tex: `A = (b+zy)y = ${r(A)}\\ \\text{ft}^2,\\quad P = ${r(P)}\\ \\text{ft},\\quad R = A/P = ${r(R)}\\ \\text{ft}` },
+        { label: "Manning velocity (USCS, k = 1.49)", tex: `V = \\dfrac{1.49}{${r(n)}}(${r(R)})^{2/3}(${r(S, 4)})^{1/2} = ${r(V)}\\ \\text{ft/s}` },
+        { label: 'Discharge', tex: `Q = VA = ${r(V)}(${r(A)}) = \\mathbf{${r(Q)}}\\ \\text{cfs}`, value: `Q = ${r(Q)} cfs` },
+        { label: `Froude number → ${Fr < 1 ? 'subcritical' : 'supercritical'}`, tex: `Fr = \\dfrac{V}{\\sqrt{g\\,A/T}} = ${r(Fr)}` },
+      ];
+    },
+  },
+  {
+    id: 'sv-headloss',
+    category: 'Water/Enviro',
+    title: 'Pipe head loss (H-W & D-W)',
+    description: 'Hazen-Williams and Darcy-Weisbach friction loss for a pressure pipe, plus velocity check. USCS.',
+    inputs: [
+      { key: 'Q', label: 'Flow Q', unit: 'gpm', default: 1000, min: 50, max: 20000, step: 50 },
+      { key: 'D', label: 'Diameter D', unit: 'in', default: 8, min: 2, max: 48, step: 1 },
+      { key: 'L', label: 'Length L', unit: 'ft', default: 1000, min: 50, max: 20000, step: 50 },
+      { key: 'C', label: 'Hazen-Williams C', default: 130, min: 80, max: 150, step: 5 },
+      { key: 'f', label: 'Darcy f', default: 0.02, min: 0.01, max: 0.05, step: 0.001 },
+    ],
+    compute: ({ Q, D, L, C, f }) => {
+      const qcfs = Q / 448.83;
+      const dft = D / 12;
+      const A = (Math.PI * dft * dft) / 4;
+      const V = qcfs / A;
+      const hfHW = (4.73 * L * Math.pow(qcfs, 1.852)) / (Math.pow(C, 1.852) * Math.pow(dft, 4.87));
+      const hfDW = (f * (L / dft) * V * V) / (2 * 32.2);
+      return [
+        { label: 'Convert & velocity', tex: `Q = ${r(qcfs)}\\ \\text{cfs};\\quad V = Q/A = ${r(V)}\\ \\text{ft/s}${V > 10 ? '\\ (\\text{high!})' : ''}` },
+        { label: 'Hazen-Williams', tex: `h_f = \\dfrac{4.73\\,L\\,Q^{1.852}}{C^{1.852}D^{4.87}} = \\mathbf{${r(hfHW)}}\\ \\text{ft}` },
+        { label: 'Darcy-Weisbach', tex: `h_f = f\\dfrac{L}{D}\\dfrac{V^2}{2g} = \\mathbf{${r(hfDW)}}\\ \\text{ft}`, value: `hf ≈ ${r(hfHW)} ft (H-W) / ${r(hfDW)} ft (D-W)` },
+      ];
+    },
+  },
+  {
+    id: 'sv-rational',
+    category: 'Water/Enviro',
+    title: 'Rational method peak flow',
+    description: 'Q = CiA with composite C from up to two surfaces.',
+    inputs: [
+      { key: 'C1', label: 'C, surface 1', default: 0.9, min: 0.05, max: 0.95, step: 0.05 },
+      { key: 'A1', label: 'Area 1', unit: 'ac', default: 5, min: 0, max: 200, step: 0.5 },
+      { key: 'C2', label: 'C, surface 2', default: 0.3, min: 0.05, max: 0.95, step: 0.05 },
+      { key: 'A2', label: 'Area 2', unit: 'ac', default: 10, min: 0, max: 200, step: 0.5 },
+      { key: 'i', label: 'Intensity i', unit: 'in/hr', default: 2.5, min: 0.2, max: 12, step: 0.1 },
+    ],
+    compute: ({ C1, A1, C2, A2, i }) => {
+      const At = A1 + A2;
+      const Cw = At > 0 ? (C1 * A1 + C2 * A2) / At : 0;
+      const Qp = Cw * i * At;
+      return [
+        { label: 'Composite runoff coefficient', tex: `C_w = \\dfrac{${r(C1)}(${r(A1)}) + ${r(C2)}(${r(A2)})}{${r(At)}} = ${r(Cw)}` },
+        { label: 'Peak flow (ac·in/hr ≈ cfs)', tex: `Q_p = C_w i A = ${r(Cw)}(${r(i)})(${r(At)}) = \\mathbf{${r(Qp)}}\\ \\text{cfs}`, value: `Qp = ${r(Qp)} cfs` },
+      ];
+    },
+  },
+  {
+    id: 'sv-nrcs',
+    category: 'Water/Enviro',
+    title: 'NRCS curve-number runoff',
+    description: 'Runoff depth from precipitation and CN.',
+    inputs: [
+      { key: 'P', label: 'Precipitation P', unit: 'in', default: 4, min: 0.5, max: 15, step: 0.25 },
+      { key: 'CN', label: 'Curve number', default: 80, min: 40, max: 98, step: 1 },
+    ],
+    compute: ({ P, CN }) => {
+      const S = 1000 / CN - 10;
+      const Ia = 0.2 * S;
+      const Qd = P > Ia ? Math.pow(P - Ia, 2) / (P + 0.8 * S) : 0;
+      return [
+        { label: 'Potential retention', tex: `S = \\dfrac{1000}{CN} - 10 = ${r(S)}\\ \\text{in};\\quad I_a = 0.2S = ${r(Ia)}\\ \\text{in}` },
+        { label: P > Ia ? 'Runoff depth' : 'P ≤ Ia → no runoff', tex: P > Ia ? `Q = \\dfrac{(P-0.2S)^2}{P+0.8S} = \\dfrac{(${r(P - Ia)})^2}{${r(P + 0.8 * S)}} = \\mathbf{${r(Qd)}}\\ \\text{in}` : undefined, value: `Q = ${r(Qd)} in` },
+      ];
+    },
+  },
+  {
+    id: 'sv-activated-sludge',
+    category: 'Water/Enviro',
+    title: 'Activated sludge F/M & loading',
+    description: 'Food-to-microorganism ratio, volumetric loading, and hydraulic detention time.',
+    inputs: [
+      { key: 'Q', label: 'Flow', unit: 'MGD', default: 4, min: 0.1, max: 100, step: 0.1 },
+      { key: 'S0', label: 'Influent BOD', unit: 'mg/L', default: 200, min: 50, max: 500, step: 10 },
+      { key: 'V', label: 'Aeration volume', unit: 'MG', default: 1.2, min: 0.05, max: 30, step: 0.05 },
+      { key: 'X', label: 'MLSS', unit: 'mg/L', default: 2500, min: 500, max: 6000, step: 100 },
+    ],
+    compute: ({ Q, S0, V, X }) => {
+      const fm = (Q * S0) / (V * X);
+      const bodLoad = 8.34 * Q * S0;
+      const volLoad = bodLoad / (V * 133.68 * 1000) * 1000; // lb/1000 ft³·day
+      const t = (V / Q) * 24;
+      return [
+        { label: 'F/M ratio', tex: `F/M = \\dfrac{Q S_0}{V X} = \\dfrac{${r(Q)}(${r(S0)})}{${r(V)}(${r(X)})} = \\mathbf{${r(fm)}}\\ \\text{d}^{-1}`, value: `F/M = ${r(fm)} /day` },
+        { label: 'BOD load (8.34 factor)', tex: `${r(Q)}\\ \\text{MGD} \\times ${r(S0)}\\ \\text{mg/L} \\times 8.34 = ${r(bodLoad)}\\ \\text{lb/day}` },
+        { label: 'Volumetric loading & detention', tex: `${r(volLoad)}\\ \\text{lb BOD/1000 ft}^3\\text{·day};\\quad t = V/Q = ${r(t)}\\ \\text{hr}` },
+        { label: fm >= 0.2 && fm <= 0.5 ? 'F/M in the conventional range (0.2–0.5).' : '⚠ F/M outside the conventional 0.2–0.5 range.' },
+      ];
+    },
+  },
   // ------------------------------ SEISMIC ------------------------------
   {
     id: 'sv-baseshear',
@@ -400,4 +521,4 @@ export const SOLVERS: Solver[] = [
   },
 ];
 
-export const SOLVER_CATEGORIES = ['Geotechnical', 'Seismic', 'Surveying'] as const;
+export const SOLVER_CATEGORIES = ['Geotechnical', 'Water/Enviro', 'Seismic', 'Surveying'] as const;

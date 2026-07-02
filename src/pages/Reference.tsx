@@ -34,15 +34,23 @@ export function Reference() {
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold">Reference Handbook</h1>
-        <p className="text-sm text-slate-400">
-          The equations, factors, and tables you’ll have on exam day — search and drill them so you can find them fast.
-        </p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Reference Handbook</h1>
+          <p className="text-sm text-slate-400">
+            The equations, factors, and tables you’ll have on exam day — search and drill them so you can find them fast.
+          </p>
+        </div>
+        <button
+          onClick={() => window.print()}
+          className="no-print flex-shrink-0 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-slate-500"
+        >
+          🖨 Print cheat sheet
+        </button>
       </header>
 
       {/* search + filter */}
-      <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-slate-950/95 px-4 py-3 backdrop-blur">
+      <div className="no-print sticky top-0 z-10 -mx-4 space-y-3 bg-slate-950/95 px-4 py-3 backdrop-blur">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}

@@ -47,6 +47,12 @@ export function MockList() {
                 >
                   Full blueprint ({Math.min(bank, e.questionCount)} Q)
                 </Link>
+                <Link
+                  to={`/mock/${e.id}?count=10&time=900`}
+                  className="rounded-lg border border-amber-600/40 px-4 py-2 text-center text-sm font-semibold text-amber-300 hover:border-amber-500"
+                >
+                  ⚡ Speed drill — 10 Q / 15 min
+                </Link>
               </div>
             </Card>
           );

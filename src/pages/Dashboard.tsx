@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useProgress } from '../store/progress';
 import { computeReadiness, recommend, learningInsights, coachMessage } from '../lib/analytics';
+import { simulateExam } from '../lib/simulator';
 import { Card, ProgressBar, Stat, Pill } from '../components/ui';
 import { StudyTimer } from '../components/StudyTimer';
 import { EXAM_BY_ID } from '../data/exams';
@@ -21,6 +22,7 @@ export function Dashboard() {
   const recs = recommend(attempts, lessons, cards, settings.primaryExam);
   const insights = learningInsights(attempts, lessons);
   const coach = coachMessage(attempts, lessons, cards, settings.primaryExam);
+  const sim = attempts.length >= 10 ? simulateExam(settings.primaryExam, attempts) : null;
 
   const totalAttempts = attempts.length;
   const overallAcc =
@@ -69,6 +71,54 @@ export function Dashboard() {
         <Stat label="Questions done" value={totalAttempts} sub={`${overallAcc}% correct`} />
         <Stat label="Mock exams" value={mocks.length} sub="timed simulations" />
         <Stat label="Daily goal" value={`${settings.dailyGoalMinutes}m`} sub="study target" />
+      </div>
+
+      {/* Today's session + pass probability */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Link
+          to="/today"
+          className="flex items-center justify-between rounded-xl border border-brand-500/50 bg-gradient-to-r from-brand-600/20 to-brand-600/5 p-4 transition hover:border-brand-400"
+        >
+          <div>
+            <div className="text-sm font-bold text-brand-200">▶ Start Today's Session</div>
+            <div className="mt-0.5 text-xs text-slate-400">
+              Due cards + your misses + weak areas, interleaved — sized to {settings.dailyGoalMinutes} min.
+            </div>
+          </div>
+          <span className="text-2xl text-brand-300">→</span>
+        </Link>
+
+        <Card>
+          <div className="text-xs uppercase tracking-wide text-slate-400">
+            Pass probability — {EXAM_BY_ID[settings.primaryExam]?.shortName}
+          </div>
+          {sim ? (
+            <>
+              <div className="mt-1 flex items-baseline gap-3">
+                <span
+                  className={`text-3xl font-bold ${
+                    sim.passProb >= 0.75 ? 'text-emerald-300' : sim.passProb >= 0.5 ? 'text-amber-300' : 'text-rose-300'
+                  }`}
+                >
+                  {Math.round(sim.passProb * 100)}%
+                </span>
+                <span className="text-xs text-slate-500">
+                  score {Math.round(sim.p10 * 100)}–{Math.round(sim.p90 * 100)}% (10th–90th pct)
+                </span>
+              </div>
+              <div className="mt-1.5 text-xs text-slate-400">
+                Biggest lever: <b className="text-slate-200">{sim.leverage[0]?.name}</b>
+                {sim.leverage[0] && sim.leverage[0].gain > 0.005
+                  ? ` (+${Math.round(sim.leverage[0].gain * 100)}% if improved)`
+                  : ''}
+              </div>
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-slate-400">
+              Answer 10+ questions and I'll run 3,000 simulated exams to estimate your pass probability.
+            </p>
+          )}
+        </Card>
       </div>
 
       {/* Tools: timer + exam countdown */}

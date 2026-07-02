@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { FLASHCARDS } from '../data/flashcards';
 import { EXAMS } from '../data/exams';
 import { useProgress } from '../store/progress';
-import { isDue } from '../lib/srs';
+import { fsrsIsDue as isDue } from '../lib/fsrs';
 import { RichText } from '../components/Tex';
 import { Card, Pill } from '../components/ui';
 
@@ -23,7 +23,7 @@ export function Flashcards() {
 
   const card = queue[pos];
 
-  const grade = (g: number) => {
+  const grade = (g: 1 | 2 | 3 | 4) => {
     if (!card) return;
     reviewCard(card.id, g);
     setFlipped(false);
@@ -85,10 +85,10 @@ export function Flashcards() {
 
           {flipped && (
             <div className="grid grid-cols-4 gap-2">
-              <GradeBtn color="rose" label="Again" onClick={() => grade(0)} />
-              <GradeBtn color="amber" label="Hard" onClick={() => grade(3)} />
-              <GradeBtn color="brand" label="Good" onClick={() => grade(4)} />
-              <GradeBtn color="emerald" label="Easy" onClick={() => grade(5)} />
+              <GradeBtn color="rose" label="Again" onClick={() => grade(1)} />
+              <GradeBtn color="amber" label="Hard" onClick={() => grade(2)} />
+              <GradeBtn color="brand" label="Good" onClick={() => grade(3)} />
+              <GradeBtn color="emerald" label="Easy" onClick={() => grade(4)} />
             </div>
           )}
         </>

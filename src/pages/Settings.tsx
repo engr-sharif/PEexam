@@ -1,12 +1,26 @@
 import { useRef, useState } from 'react';
 import { EXAMS } from '../data/exams';
 import { useProgress } from '../store/progress';
+import { buildStudyPlanIcs, downloadIcs } from '../lib/ics';
 import { Card } from '../components/ui';
 
 export function Settings() {
   const { settings, updateSettings, exportState, importState, resetAll } = useProgress();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState('');
+  const [weeklyHours, setWeeklyHours] = useState(10);
+  const [daysPerWeek, setDaysPerWeek] = useState(4);
+
+  const downloadCalendar = () => {
+    const ics = buildStudyPlanIcs({
+      examDates: settings.examDates,
+      examNames: Object.fromEntries(EXAMS.map((e) => [e.id, e.shortName])),
+      weeklyHours,
+      daysPerWeek,
+    });
+    downloadIcs('ca-pe-study-plan.ics', ics);
+    setMsg('Calendar downloaded — import it into Google/Apple Calendar.');
+  };
 
   const download = () => {
     const blob = new Blob([exportState()], { type: 'application/json' });
@@ -91,6 +105,33 @@ export function Settings() {
             </label>
           ))}
         </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-sm font-semibold text-slate-200">Study calendar (.ics)</h2>
+        <p className="mb-3 text-xs text-slate-400">
+          Generate a study schedule from your exam dates and import it into Google/Apple/Outlook Calendar.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block text-sm text-slate-300">
+            Hours per week: <span className="font-semibold text-brand-300">{weeklyHours} h</span>
+            <input type="range" min={2} max={30} value={weeklyHours} onChange={(e) => setWeeklyHours(Number(e.target.value))} className="mt-1 w-full accent-brand-500" />
+          </label>
+          <label className="block text-sm text-slate-300">
+            Days per week: <span className="font-semibold text-brand-300">{daysPerWeek}</span>
+            <input type="range" min={1} max={7} value={daysPerWeek} onChange={(e) => setDaysPerWeek(Number(e.target.value))} className="mt-1 w-full accent-brand-500" />
+          </label>
+        </div>
+        <button
+          onClick={downloadCalendar}
+          disabled={!Object.values(settings.examDates).some(Boolean)}
+          className="mt-3 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+        >
+          📅 Download study calendar
+        </button>
+        {!Object.values(settings.examDates).some(Boolean) && (
+          <p className="mt-2 text-xs text-amber-400">Set at least one exam date above first.</p>
+        )}
       </Card>
 
       <Card>

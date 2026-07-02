@@ -1,12 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CardState } from '../lib/srs';
-import { newCard, schedule } from '../lib/srs';
+import type { FsrsCard } from '../lib/fsrs';
+import { newFsrsCard, reviewFsrs } from '../lib/fsrs';
+
+/** Convert a legacy SM-2 card (pre-FSRS) into an FSRS card on the fly. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toFsrs(c: any): FsrsCard {
+  if (c && typeof c.stability === 'number') return c as FsrsCard;
+  return {
+    due: c?.due ?? Date.now(),
+    stability: Math.max(0.5, c?.intervalDays ?? 0.5),
+    difficulty: 5,
+    reps: c?.reps ?? 0,
+    lapses: 0,
+    lastReview: null,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // All learner progress lives here and is persisted to localStorage. This is
 // the "memory" the adaptive engine reads to learn how YOU learn.
 // ---------------------------------------------------------------------------
+
+export type ErrorType = 'concept' | 'arithmetic' | 'misread' | 'time';
 
 export interface Attempt {
   id: string; // unique
@@ -17,8 +33,10 @@ export interface Attempt {
   timeMs: number;
   /** self-rated confidence before/after answering, 1..3 (optional) */
   confidence?: number;
+  /** self-tagged failure mode for incorrect answers */
+  errorType?: ErrorType;
   at: number; // epoch ms
-  /** 'practice' | 'mock' | 'review' */
+  /** 'practice' | 'mock' | 'review' | 'diagnostic' | 'session' */
   mode: string;
 }
 
@@ -60,7 +78,7 @@ export interface Streak {
 interface ProgressState {
   attempts: Attempt[];
   lessons: Record<string, LessonProgress>;
-  cards: Record<string, CardState>;
+  cards: Record<string, FsrsCard>;
   mocks: MockResult[];
   settings: Settings;
   streak: Streak;
@@ -68,9 +86,11 @@ interface ProgressState {
   minutesByDay: Record<string, number>;
 
   recordAttempt: (a: Omit<Attempt, 'id' | 'at'>) => void;
+  /** Tag the most recent attempt on a question with a failure mode. */
+  tagAttemptError: (questionId: string, errorType: ErrorType) => void;
   setLessonProgress: (lessonId: string, patch: Partial<LessonProgress>) => void;
-  reviewCard: (cardId: string, grade: number) => void;
-  cardState: (cardId: string) => CardState;
+  reviewCard: (cardId: string, grade: 1 | 2 | 3 | 4) => void;
+  cardState: (cardId: string) => FsrsCard;
   recordMock: (r: Omit<MockResult, 'id' | 'at'>) => void;
   addStudyMinutes: (mins: number) => void;
   updateSettings: (patch: Partial<Settings>) => void;
@@ -125,6 +145,18 @@ export const useProgress = create<ProgressState>()(
           return { attempts, streak: bumpStreak(st.streak) };
         }),
 
+      tagAttemptError: (questionId, errorType) =>
+        set((st) => {
+          for (let i = st.attempts.length - 1; i >= 0; i--) {
+            if (st.attempts[i].questionId === questionId) {
+              const attempts = [...st.attempts];
+              attempts[i] = { ...attempts[i], errorType };
+              return { attempts };
+            }
+          }
+          return {};
+        }),
+
       setLessonProgress: (lessonId, patch) =>
         set((st) => {
           const prev = st.lessons[lessonId] ?? {
@@ -146,13 +178,13 @@ export const useProgress = create<ProgressState>()(
           };
         }),
 
-      cardState: (cardId) => get().cards[cardId] ?? newCard(),
+      cardState: (cardId) => toFsrs(get().cards[cardId]) ?? newFsrsCard(),
 
       reviewCard: (cardId, grade) =>
         set((st) => {
-          const cur = st.cards[cardId] ?? newCard();
+          const cur = st.cards[cardId] ? toFsrs(st.cards[cardId]) : newFsrsCard();
           return {
-            cards: { ...st.cards, [cardId]: schedule(cur, grade) },
+            cards: { ...st.cards, [cardId]: reviewFsrs(cur, grade) },
             streak: bumpStreak(st.streak),
           };
         }),

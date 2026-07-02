@@ -2,8 +2,8 @@ import type { Attempt, LessonProgress } from '../store/progress';
 import { EXAMS, EXAM_BY_ID, areaById } from '../data/exams';
 import { lessonsForArea } from '../data/lessons';
 import { QUESTIONS } from '../data/questions';
-import type { CardState } from './srs';
-import { isDue } from './srs';
+import type { FsrsCard } from './fsrs';
+import { fsrsIsDue as isDue } from './fsrs';
 
 const HALF_LIFE_MS = 14 * 24 * 60 * 60 * 1000; // 14-day recency half-life
 
@@ -123,7 +123,7 @@ export interface Recommendation {
 export function recommend(
   attempts: Attempt[],
   lessons: Record<string, LessonProgress>,
-  cards: Record<string, CardState>,
+  cards: Record<string, FsrsCard>,
   primaryExam: string,
 ): Recommendation[] {
   const recs: Recommendation[] = [];
@@ -425,7 +425,7 @@ export function pickAdaptiveQuestions(
 export function coachMessage(
   attempts: Attempt[],
   lessons: Record<string, LessonProgress>,
-  cards: Record<string, CardState>,
+  cards: Record<string, FsrsCard>,
   primaryExam: string,
 ): string {
   const due = Object.values(cards).filter((s) => isDue(s)).length;

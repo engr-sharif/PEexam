@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { QUESTIONS, QUESTION_BY_ID } from '../data/questions';
 import { areaById, EXAM_BY_ID } from '../data/exams';
 import { useProgress } from '../store/progress';
-import { isDue } from '../lib/srs';
+import { fsrsIsDue as isDue } from '../lib/fsrs';
 import { QuestionCard } from '../components/QuestionCard';
 import { RichText } from '../components/Tex';
 import { Card, Pill } from '../components/ui';

@@ -34,3 +34,31 @@ body {
 input[type='range'] {
   height: 1.25rem;
 }
+
+/* ---- printable cheat sheets (Reference page) ---- */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  aside,
+  nav,
+  header,
+  .no-print {
+    display: none !important;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+  .rounded-xl,
+  .rounded-lg {
+    border-color: #ddd !important;
+    background: #fff !important;
+    break-inside: avoid;
+  }
+  * {
+    color: #111 !important;
+  }
+  .katex {
+    color: #000 !important;
+  }
+}

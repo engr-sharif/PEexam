@@ -330,10 +330,13 @@ export function buildMockExam(examId: string, count?: number) {
   const pool = QUESTIONS.filter((q) => q.examId === examId);
   if (pool.length === 0) return [];
 
-  // target count per area by weight
+  // target count per area by NORMALIZED weight (published ranges can sum to
+  // more than 100%, e.g. geotech midpoints total 110% — normalize so a full
+  // mock is exactly `total` questions)
+  const weightSum = exam.areas.reduce((s, a) => s + a.weight, 0);
   const targets = exam.areas.map((a) => ({
     areaId: a.id,
-    n: Math.max(0, Math.round(total * a.weight)),
+    n: Math.max(0, Math.round((total * a.weight) / weightSum)),
   }));
 
   const chosen: typeof pool = [];
@@ -341,6 +344,7 @@ export function buildMockExam(examId: string, count?: number) {
   for (const t of targets) {
     const areaPool = shuffle(pool.filter((q) => q.areaId === t.areaId));
     for (let i = 0; i < t.n && i < areaPool.length; i++) {
+      if (chosen.length >= total) break;
       chosen.push(areaPool[i]);
       used.add(areaPool[i].id);
     }

@@ -7,6 +7,7 @@ import { Calculator } from '../components/Calculator';
 import { RichText } from '../components/Tex';
 import type { MockResult } from '../store/progress';
 import type { Exam, Question } from '../types';
+import { choiceOrder, answerLetter } from '../lib/choiceOrder';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -39,6 +40,11 @@ export function MockRunner() {
   const [showCalc, setShowCalc] = useState(false);
   const [result, setResult] = useState<MockResult | null>(null);
   const startTime = useRef(0);
+  // Refs mirror state so the countdown's auto-submit sees current values
+  // (the interval closure would otherwise capture a stale `answers`).
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+  const finishedRef = useRef(false);
 
   useEffect(() => {
     setRemaining(totalSeconds);
@@ -76,15 +82,19 @@ export function MockRunner() {
     setCur(0);
     setRemaining(totalSeconds);
     startTime.current = Date.now();
+    finishedRef.current = false;
     setStarted(true);
   }
 
   function finish() {
+    if (finishedRef.current) return; // guard double submit (timer + button)
+    finishedRef.current = true;
+    const finalAnswers = answersRef.current;
     const durationMs = Date.now() - startTime.current;
     let correct = 0;
     const byArea: Record<string, { correct: number; total: number }> = {};
     const ansSnapshot = questions.map((q, i) => {
-      const chosen = answers[i];
+      const chosen = finalAnswers[i];
       const ok = chosen === q.answerIndex;
       if (ok) correct++;
       byArea[q.areaId] = byArea[q.areaId] ?? { correct: 0, total: 0 };
@@ -187,17 +197,18 @@ export function MockRunner() {
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
             <RichText html={q.stem} className="text-slate-100" />
             <div className="mt-4 space-y-2">
-              {q.choices.map((choice, i) => {
-                const isChosen = answers[cur] === i;
+              {choiceOrder(q).map((origIdx, dispIdx) => {
+                const choice = q.choices[origIdx];
+                const isChosen = answers[cur] === origIdx;
                 return (
                   <button
-                    key={i}
-                    onClick={() => setAnswers((a) => a.map((v, idx) => (idx === cur ? i : v)))}
+                    key={origIdx}
+                    onClick={() => setAnswers((a) => a.map((v, idx) => (idx === cur ? origIdx : v)))}
                     className={`flex w-full items-start gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition ${
                       isChosen ? 'border-brand-500 bg-brand-500/10' : 'border-slate-700 hover:border-slate-500'
                     }`}
                   >
-                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">{LETTERS[i]}</span>
+                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">{LETTERS[dispIdx]}</span>
                     <RichText html={choice} className="text-slate-200" />
                   </button>
                 );
@@ -315,7 +326,7 @@ function Results({
                 </summary>
                 <div className="mt-2 text-sm">
                   <div className="text-slate-400">
-                    Your answer: {a.chosen !== null ? LETTERS[a.chosen] : '—'} · Correct: {LETTERS[q.answerIndex]}
+                    Your answer: {a.chosen !== null ? LETTERS[choiceOrder(q).indexOf(a.chosen)] : '—'} · Correct: {answerLetter(q)}
                   </div>
                   <RichText html={q.explanation} className="mt-1 text-slate-300" />
                 </div>

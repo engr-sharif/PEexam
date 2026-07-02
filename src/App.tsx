@@ -10,6 +10,9 @@ import { Flashcards } from './pages/Flashcards';
 import { ProgressPage } from './pages/ProgressPage';
 import { Reference } from './pages/Reference';
 import { Settings } from './pages/Settings';
+import { MathLab } from './pages/MathLab';
+import { ReviewPage } from './pages/ReviewPage';
+import { Diagnostic } from './pages/Diagnostic';
 import { ScrollToTop } from './components/ScrollToTop';
 
 export default function App() {
@@ -26,6 +29,9 @@ export default function App() {
           <Route path="mock" element={<MockList />} />
           <Route path="mock/:examId" element={<MockRunner />} />
           <Route path="flashcards" element={<Flashcards />} />
+          <Route path="mathlab" element={<MathLab />} />
+          <Route path="review" element={<ReviewPage />} />
+          <Route path="diagnostic" element={<Diagnostic />} />
           <Route path="progress" element={<ProgressPage />} />
           <Route path="reference" element={<Reference />} />
           <Route path="settings" element={<Settings />} />

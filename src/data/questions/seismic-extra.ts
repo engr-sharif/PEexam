@@ -1,0 +1,211 @@
+import type { Question } from '../../types';
+
+// CA Civil Seismic Principles — extra original practice questions
+// modeled on the BPELSG test plan and ASCE 7-16 / CBC.
+export const seismicExtraQuestions: Question[] = [
+  // ── seis-data ────────────────────────────────────────────────
+  {
+    id: 'q-seis-x1',
+    examId: 'ca-seismic',
+    areaId: 'seis-data',
+    difficulty: 'medium',
+    stem: 'A Risk Category II office building is located where the mapped $S_1 = 0.80$ g. Per ASCE 7-16 §11.6, the Seismic Design Category is:',
+    choices: [
+      'E, assigned directly because $S_1 \\ge 0.75$ g',
+      'D, based on the SDS table only',
+      'C, based on the SD1 table only',
+      'F, because $S_1 \\ge 0.75$ g',
+    ],
+    answerIndex: 0,
+    explanation: "When $S_1 \\ge 0.75$ g, Risk Category I–III structures are assigned SDC E directly (Risk Category IV would be SDC F); the SDS/SD1 tables are bypassed.",
+    tags: ['SDC', 'design parameters'],
+  },
+  {
+    id: 'q-seis-x2',
+    examId: 'ca-seismic',
+    areaId: 'seis-data',
+    difficulty: 'medium',
+    stem: 'A Site Class D site has mapped $S_S = 1.0$ g and $S_1 = 0.40$ g, with site coefficients $F_a = 1.1$ and $F_v = 1.9$. The design parameters $S_{DS}$ and $S_{D1}$ are most nearly:',
+    choices: [
+      '$S_{DS} = 1.10$ g, $S_{D1} = 0.76$ g',
+      '$S_{DS} = 0.73$ g, $S_{D1} = 0.51$ g',
+      '$S_{DS} = 0.67$ g, $S_{D1} = 0.27$ g',
+      '$S_{DS} = 0.73$ g, $S_{D1} = 0.27$ g',
+    ],
+    answerIndex: 1,
+    explanation: 'Modify the mapped values by the site coefficients, then take two-thirds of each.',
+    solution: [
+      { text: 'Site-modified short period:', tex: 'S_{MS} = F_a S_S = 1.1(1.0) = 1.10\\ g' },
+      { text: 'Site-modified 1-second:', tex: 'S_{M1} = F_v S_1 = 1.9(0.40) = 0.76\\ g' },
+      { text: 'Design short period:', tex: 'S_{DS} = \\tfrac{2}{3}(1.10) = 0.73\\ g' },
+      { text: 'Design 1-second:', tex: 'S_{D1} = \\tfrac{2}{3}(0.76) = 0.51\\ g' },
+    ],
+    tags: ['site coefficients', 'design parameters'],
+  },
+
+  // ── seis-characteristics ─────────────────────────────────────
+  {
+    id: 'q-seis-x3',
+    examId: 'ca-seismic',
+    areaId: 'seis-characteristics',
+    difficulty: 'medium',
+    stem: 'A single-story structure has a seismic weight $W = 200$ kips and a lateral stiffness $k = 500$ kip/in. Using $g = 386.4$ in/s², the natural period is most nearly:',
+    choices: ['3.97 s', '0.032 s', '0.20 s', '0.40 s'],
+    answerIndex: 2,
+    explanation: "Convert weight to mass with $m = W/g$ before applying $T = 2\\pi\\sqrt{m/k}$.",
+    solution: [
+      { text: 'Mass from weight:', tex: 'm = \\dfrac{W}{g} = \\dfrac{200}{386.4} = 0.518\\ \\text{kip·s}^2/\\text{in}' },
+      { text: 'Natural period:', tex: 'T = 2\\pi\\sqrt{\\dfrac{m}{k}} = 2\\pi\\sqrt{\\dfrac{0.518}{500}} = 0.20\\ \\text{s}' },
+    ],
+    tags: ['dynamics', 'period'],
+  },
+  {
+    id: 'q-seis-x4',
+    examId: 'ca-seismic',
+    areaId: 'seis-characteristics',
+    difficulty: 'easy',
+    stem: 'A rigid diaphragm (e.g., a concrete slab) distributes story shear to the vertical lateral-force-resisting elements in proportion to:',
+    choices: [
+      'The tributary area supported by each element',
+      'The relative lateral stiffness of each element',
+      'The plan length of each wall or frame',
+      'Equal shares among all elements',
+    ],
+    answerIndex: 1,
+    explanation: 'Rigid diaphragms distribute by relative stiffness (including torsion); flexible diaphragms distribute by tributary area.',
+    tags: ['diaphragms'],
+  },
+
+  // ── seis-buildings ───────────────────────────────────────────
+  {
+    id: 'q-seis-x5',
+    examId: 'ca-seismic',
+    areaId: 'seis-buildings',
+    difficulty: 'hard',
+    stem: 'A building has $S_{DS} = 1.0$ g, $S_{D1} = 0.50$ g, $S_1 = 0.45$ g, $R = 8$, $I_e = 1.0$, $T = 1.0$ s, and $T_L = 8$ s. Per ASCE 7-16 §12.8, the governing seismic response coefficient $C_s$ is:',
+    choices: ['0.125', '0.044', '0.010', '0.0625'],
+    answerIndex: 3,
+    explanation: 'The period-based upper limit governs because it is less than the base equation but still above the minimum.',
+    solution: [
+      { text: 'Base equation:', tex: 'C_s = \\dfrac{S_{DS}}{R/I_e} = \\dfrac{1.0}{8/1.0} = 0.125' },
+      { text: 'Upper limit for $T \\le T_L$:', tex: 'C_{s,max} = \\dfrac{S_{D1}}{T(R/I_e)} = \\dfrac{0.50}{1.0(8)} = 0.0625' },
+      { text: 'Minimum:', tex: 'C_{s,min} = 0.044 S_{DS} I_e = 0.044(1.0)(1.0) = 0.044 \\ge 0.01' },
+      { text: 'Governing value: $0.044 \\le 0.0625 \\le 0.125$, so $C_s = 0.0625$.' },
+    ],
+    tags: ['base shear', 'ELF'],
+  },
+  {
+    id: 'q-seis-x6',
+    examId: 'ca-seismic',
+    areaId: 'seis-buildings',
+    difficulty: 'medium',
+    stem: 'A two-story building has $V = 100$ kips and $T = 0.4$ s (so $k = 1.0$). The roof has $w_2 = 500$ kips at $h_2 = 24$ ft; the second floor has $w_1 = 500$ kips at $h_1 = 12$ ft. The lateral force at the roof, $F_2$, is most nearly:',
+    choices: ['50.0 kips', '33.3 kips', '66.7 kips', '100 kips'],
+    answerIndex: 2,
+    explanation: 'Vertical distribution uses $F_x = C_{vx} V$ with $C_{vx} = w_x h_x^k / \\sum w_i h_i^k$.',
+    solution: [
+      { text: 'Weight-height products ($k = 1$):', tex: 'w_2 h_2 = 500(24) = 12{,}000; \\quad w_1 h_1 = 500(12) = 6{,}000' },
+      { text: 'Distribution factor:', tex: 'C_{v2} = \\dfrac{12{,}000}{12{,}000 + 6{,}000} = 0.667' },
+      { text: 'Roof force:', tex: 'F_2 = C_{v2} V = 0.667(100) = 66.7\\ \\text{kips}' },
+    ],
+    tags: ['vertical distribution', 'story forces'],
+  },
+  {
+    id: 'q-seis-x7',
+    examId: 'ca-seismic',
+    areaId: 'seis-buildings',
+    difficulty: 'medium',
+    stem: 'A building assigned to SDC D does not satisfy any of the conditions of ASCE 7-16 §12.3.4.2. The redundancy factor $\\rho$ applied to the horizontal seismic load effect is:',
+    choices: ['1.0', '1.3', '1.2', '1.5'],
+    answerIndex: 1,
+    explanation: 'In SDC D–F, $\\rho = 1.3$ unless one of the prescriptive redundancy conditions is met; in SDC B and C, $\\rho = 1.0$.',
+    tags: ['redundancy'],
+  },
+  {
+    id: 'q-seis-x8',
+    examId: 'ca-seismic',
+    areaId: 'seis-buildings',
+    difficulty: 'easy',
+    stem: 'For structures with rigid or semirigid diaphragms, accidental torsion is accounted for by assuming the center of mass is displaced from its actual location by:',
+    choices: [
+      '5% of the plan dimension perpendicular to the applied force',
+      '5% of the plan dimension parallel to the applied force',
+      '10% of the plan dimension perpendicular to the applied force',
+      'The distance between the center of mass and center of rigidity',
+    ],
+    answerIndex: 0,
+    explanation: 'Accidental torsion uses a 5% eccentricity of the dimension perpendicular to the direction of loading, each way.',
+    tags: ['torsion'],
+  },
+
+  // ── seis-nonbuilding ─────────────────────────────────────────
+  {
+    id: 'q-seis-x9',
+    examId: 'ca-seismic',
+    areaId: 'seis-nonbuilding',
+    difficulty: 'hard',
+    stem: 'A mechanical unit ($W_p = 10$ kips) is anchored at grade level ($z = 0$) of a building with $S_{DS} = 1.0$ g. Given $a_p = 1.0$, $R_p = 2.5$, and $I_p = 1.0$, the design seismic force $F_p$ per ASCE 7-16 Chapter 13 is:',
+    choices: ['1.6 kips', '4.0 kips', '3.0 kips', '16.0 kips'],
+    answerIndex: 2,
+    explanation: 'The computed $F_p$ falls below the floor $0.3 S_{DS} I_p W_p$, so the minimum governs.',
+    solution: [
+      { text: 'Computed force at $z = 0$:', tex: 'F_p = \\dfrac{0.4 a_p S_{DS} W_p}{R_p/I_p}\\left(1 + 2\\dfrac{z}{h}\\right) = \\dfrac{0.4(1.0)(1.0)(10)}{2.5}(1 + 0) = 1.6\\ \\text{kips}' },
+      { text: 'Lower bound:', tex: 'F_{p,min} = 0.3 S_{DS} I_p W_p = 0.3(1.0)(1.0)(10) = 3.0\\ \\text{kips}' },
+      { text: 'Upper bound:', tex: 'F_{p,max} = 1.6 S_{DS} I_p W_p = 16.0\\ \\text{kips}' },
+      { text: 'Since $1.6 < 3.0$, the floor controls: $F_p = 3.0$ kips.' },
+    ],
+    tags: ['components', 'Fp'],
+  },
+  {
+    id: 'q-seis-x10',
+    examId: 'ca-seismic',
+    areaId: 'seis-nonbuilding',
+    difficulty: 'medium',
+    stem: 'Compared with the $R = 8$ used for a special steel moment frame building, the response modification coefficient for a ground-supported welded steel storage tank is:',
+    choices: [
+      'The same, since both are steel structures',
+      'Higher, because tanks are simpler to analyze',
+      'Not applicable; R is not used for nonbuilding structures',
+      'Significantly lower, reflecting limited ductility and redundancy',
+    ],
+    answerIndex: 3,
+    explanation: 'ASCE 7-16 Table 15.4-2 assigns tanks low R values (about 2 to 3) because they lack the ductility and redundancy of building frames.',
+    tags: ['nonbuilding', 'tanks', 'R factor'],
+  },
+
+  // ── seis-analysis ────────────────────────────────────────────
+  {
+    id: 'q-seis-x11',
+    examId: 'ca-seismic',
+    areaId: 'seis-analysis',
+    difficulty: 'medium',
+    stem: 'A modal response spectrum analysis produces a combined base shear $V_t$ that is less than the equivalent lateral force base shear $V$. Per ASCE 7-16 §12.9.1.4, the design forces must be:',
+    choices: [
+      'Scaled up by $V/V_t$ so the modal base shear is at least 100% of the ELF base shear',
+      'Scaled up only to 85% of the ELF base shear',
+      'Used without modification, since MRSA is more accurate',
+      'Replaced entirely by the ELF results',
+    ],
+    answerIndex: 0,
+    explanation: 'ASCE 7-16 requires scaling modal forces to no less than 100% of the ELF base shear (raised from 85% in ASCE 7-10).',
+    tags: ['MRSA', 'scaling'],
+  },
+
+  // ── seis-detailing ───────────────────────────────────────────
+  {
+    id: 'q-seis-x12',
+    examId: 'ca-seismic',
+    areaId: 'seis-detailing',
+    difficulty: 'easy',
+    stem: 'In a steel special moment frame beam, the "protected zone" is best described as the region where:',
+    choices: [
+      'Only the fabricator may make field welds',
+      'Lateral bracing of the bottom flange must be doubled',
+      'Continuity plates are always required',
+      'Plastic hinging is expected, so welded, bolted, or shot-in attachments are prohibited',
+    ],
+    answerIndex: 3,
+    explanation: 'AISC 341 designates expected plastic hinge regions as protected zones; discontinuities from attachments or fabrication are prohibited there.',
+    tags: ['protected zone', 'special inspection'],
+  },
+];

@@ -46,6 +46,7 @@ export const surveyingLessons: Lesson[] = [
       { kind: 'formula', tex: 'y = \\dfrac{A}{200 L}x^2', caption: 'Offset from the tangent at distance x from BVC (x, L in stations; y in ft)' },
       { kind: 'formula', tex: 'Elev_x = Elev_{BVC} + g_1 x + \\dfrac{A}{200L}x^2', caption: 'Elevation on the curve (x from BVC)' },
       { kind: 'formula', tex: 'x_{turn} = \\dfrac{-g_1 L}{A} = \\dfrac{g_1}{g_1-g_2}L', caption: 'Distance from BVC to the high/low point' },
+      { kind: 'animation', component: 'VerticalCurveViz', caption: 'Drag the grades and length — watch the curve, PVI, and high/low point move.' },
       {
         kind: 'example',
         title: 'Low point of a sag curve',

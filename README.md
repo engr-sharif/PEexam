@@ -18,7 +18,10 @@ before your exam date.**
 
 ## Features
 
-- **Dashboard** — readiness score per exam, weakest-area surfacing, study streak, and a "recommended for you" queue.
+- **Placement diagnostic** — a 12-question quiz on first launch that baselines your competency per exam and seeds the study plan.
+- **MathLab** — a built-in calculation workspace: ~14 guided solvers (bearing capacity, consolidation, base shear, curve stationing, …) that show every step with your numbers, plus a free-form notebook worksheet with variables and degree-mode trig.
+- **Review / cram mode** — an automatic error log of every question whose latest attempt was wrong, with one-tap cram sessions until each is corrected.
+- **Dashboard** — readiness score per exam, weakest-area surfacing, study streak, exam-date countdown, study timer, and a "recommended for you" queue.
 - **Study modules** — knowledge-area tree with mastery bars; lessons render real math (KaTeX), worked examples, exam-day tips, **interactive animations**, and curated video links. Rate your confidence per topic.
 - **Interactive animations** — Mohr's circle, effective-stress profile, ASCE 7 design response spectrum / base shear, and horizontal-curve geometry. Drag the inputs and watch the results.
 - **Practice** — build an untimed quiz filtered by exam/area, with instant explanations.

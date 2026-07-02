@@ -230,6 +230,7 @@ export const geotechLessons: Lesson[] = [
         ],
       },
       { kind: 'callout', tone: 'warn', html: `<b>Drainage path Hdr.</b> Double drainage (sand above and below) → Hdr = H/2. Single drainage → Hdr = H. Time depends on Hdr², so this factor of 2 changes time by 4×.` },
+      { kind: 'animation', component: 'ConsolidationCurve', caption: 'Settlement vs time — toggle drainage and watch t₅₀/t₉₀ shift by 4×.' },
       { kind: 'callout', tone: 'tip', html: `U = 50% → Tv = 0.197; U = 90% → Tv = 0.848. Memorize these two — they cover most time-rate questions.` },
     ],
     tips: [

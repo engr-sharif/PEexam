@@ -37,6 +37,24 @@ export function Dashboard() {
         </p>
       </header>
 
+      {/* First-run diagnostic */}
+      {totalAttempts === 0 && (
+        <Link
+          to="/diagnostic"
+          className="block rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 transition hover:border-emerald-400"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-bold text-emerald-200">🧭 New here? Take the 12-question placement diagnostic</div>
+              <div className="mt-0.5 text-xs text-emerald-100/70">
+                ~15 minutes. It sets your baseline per exam so recommendations target the right areas from day one.
+              </div>
+            </div>
+            <span className="ml-3 text-emerald-300">→</span>
+          </div>
+        </Link>
+      )}
+
       {/* Tutor coach */}
       <div className="flex items-start gap-3 rounded-xl border border-brand-600/30 bg-brand-600/10 p-4">
         <span className="text-2xl">👨‍🏫</span>

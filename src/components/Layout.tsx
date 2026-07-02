@@ -8,9 +8,11 @@ const primary: NavItem[] = [
   { to: '/study', label: 'Study', icon: '📚' },
   { to: '/practice', label: 'Practice', icon: '✎' },
   { to: '/mock', label: 'Mocks', icon: '⏱' },
-  { to: '/flashcards', label: 'Cards', icon: '🃏' },
+  { to: '/mathlab', label: 'MathLab', icon: '🧮' },
 ];
 const secondary: NavItem[] = [
+  { to: '/review', label: 'Review', icon: '🎯' },
+  { to: '/flashcards', label: 'Flashcards', icon: '🃏' },
   { to: '/progress', label: 'Progress', icon: '📈' },
   { to: '/reference', label: 'Reference', icon: '📖' },
   { to: '/settings', label: 'Settings', icon: '⚙' },

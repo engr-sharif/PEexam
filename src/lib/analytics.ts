@@ -142,7 +142,22 @@ export function recommend(
     });
   }
 
-  // 2) Weakest high-weight areas (leverage = weight × (1 − mastery))
+  // 2) Open items in the error log (latest attempt wrong)
+  const latest = new Map<string, { correct: boolean; examId: string }>();
+  for (const a of attempts) latest.set(a.questionId, { correct: a.correct, examId: a.examId });
+  const missed = [...latest.values()].filter((v) => !v.correct).length;
+  if (missed >= 3) {
+    recs.push({
+      kind: 'practice',
+      examId: primaryExam,
+      title: `Fix ${missed} missed questions (cram mode)`,
+      reason: 'Correcting your own misses is the highest-yield review there is.',
+      to: '/review',
+      priority: 80 + Math.min(missed, 10),
+    });
+  }
+
+  // 3) Weakest high-weight areas (leverage = weight × (1 − mastery))
   const ranked = [...mastery]
     .map((m) => ({ m, leverage: m.weight * (1 - m.mastery) }))
     .sort((a, b) => b.leverage - a.leverage);

@@ -28,7 +28,12 @@ jobs:
       - name: Set base path
         run: echo "VITE_BASE=/${GITHUB_REPOSITORY#*/}/" >> "$GITHUB_ENV"
       - run: npm run build
+      # enablement: true auto-configures the repo's Pages site to deploy from
+      # GitHub Actions (fixes "Get Pages site failed / Not Found" on first run
+      # and overrides a stale "deploy from branch" setting).
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

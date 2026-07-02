@@ -1,11 +1,13 @@
 # California PE Civil — Exam Prep
 
-A self-hosted, offline-capable study app for the **three exams** required for
-California civil PE licensure:
+A self-hosted, offline-capable study app for California civil PE licensure —
+covering **both NCEES depth options** (choose your path later) plus the two
+California-specific exams:
 
 | Exam | Authority | Format |
 |------|-----------|--------|
 | **PE Civil — Geotechnical depth** | NCEES | 80 questions · 9-hour appointment |
+| **PE Civil — Water Resources & Environmental depth** | NCEES | 80 questions · 9-hour appointment |
 | **CA Civil Seismic Principles** | BPELSG (Prometric) | 55 questions · 2.5 hours |
 | **CA Civil Engineering Surveying** | BPELSG (Prometric) | 55 questions · 2.5 hours |
 

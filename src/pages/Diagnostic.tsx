@@ -10,7 +10,7 @@ import { Card, Pill, ProgressBar } from '../components/ui';
 const toneFor = (id: string) =>
   id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
-/** 12-question placement quiz: 4 per exam, spread across areas & difficulties. */
+/** Placement quiz: 4 per exam, spread across areas & difficulties. */
 function buildDiagnostic() {
   const set: typeof QUESTIONS = [];
   for (const exam of EXAMS) {
@@ -54,7 +54,7 @@ export function Diagnostic() {
         <h1 className="text-2xl font-bold">Placement diagnostic</h1>
         <Card>
           <p className="text-sm text-slate-300">
-            {quiz.length} questions across all exams (~15 minutes, untimed). I use the results to set your
+            {quiz.length} questions across all exams (~{Math.round(quiz.length * 1.25)} minutes, untimed). I use the results to set your
             starting competency per area, so your study plan targets the right things from day one.
           </p>
           <ul className="mt-3 list-disc pl-5 text-sm text-slate-400">

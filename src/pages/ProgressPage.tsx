@@ -1,13 +1,47 @@
 import { useProgress } from '../store/progress';
 import { computeAreaMastery, computeReadiness, learningInsights } from '../lib/analytics';
-import { EXAMS } from '../data/exams';
+import { EXAMS, EXAM_BY_ID } from '../data/exams';
+import { FLASHCARDS } from '../data/flashcards';
+import { retrievability } from '../lib/fsrs';
 import { Card, Pill, ProgressBar, Stat } from '../components/ui';
 
+const ERROR_LABELS: Record<string, string> = {
+  concept: '🧠 Concept gaps',
+  arithmetic: '🔢 Arithmetic slips',
+  misread: '👁 Misreads',
+  time: '⏱ Time pressure',
+};
+
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function ProgressPage() {
-  const { attempts, lessons, mocks, minutesByDay, streak } = useProgress();
+  const { attempts, lessons, mocks, minutesByDay, streak, cards, settings } = useProgress();
+
+  // ---- Forgetting projection: mean FSRS retrievability of each area's
+  // flashcards, projected to your exam date (or 30 days out if unset). ----
+  const primary = settings.primaryExam;
+  const examDateStr = settings.examDates[primary];
+  const horizon = examDateStr
+    ? new Date(examDateStr + 'T08:00:00').getTime()
+    : Date.now() + 30 * 86400000;
+  const horizonLabel = examDateStr ? 'on your exam date' : 'in 30 days';
+  const retentionByArea = (EXAM_BY_ID[primary]?.areas ?? [])
+    .map((a) => {
+      const areaCards = FLASHCARDS.filter((c) => c.areaId === a.id && cards[c.id]);
+      if (areaCards.length === 0) return { name: a.name, r: null as number | null };
+      const mean =
+        areaCards.reduce((s, c) => s + retrievability(cards[c.id], Math.max(horizon, Date.now())), 0) /
+        areaCards.length;
+      return { name: a.name, r: mean };
+    })
+    .filter((x) => x.r !== null) as { name: string; r: number }[];
+
+  // ---- Error taxonomy: why you miss ----
+  const tagged = attempts.filter((a) => !a.correct && a.errorType);
+  const errCounts: Record<string, number> = {};
+  for (const a of tagged) errCounts[a.errorType!] = (errCounts[a.errorType!] ?? 0) + 1;
+  const errRanked = Object.entries(errCounts).sort((a, b) => b[1] - a[1]);
   const readiness = computeReadiness(attempts, lessons);
   const insights = learningInsights(attempts, lessons);
 
@@ -52,6 +86,53 @@ export function ProgressPage() {
           <span>today</span>
         </div>
       </Card>
+
+      {/* forgetting projection */}
+      {retentionByArea.length > 0 && (
+        <Card>
+          <h2 className="mb-1 text-sm font-semibold text-slate-200">
+            Projected retention {horizonLabel} — {EXAM_BY_ID[primary]?.shortName}
+          </h2>
+          <p className="mb-3 text-xs text-slate-500">
+            FSRS forgetting-curve projection from your review history. Red areas will decay below passing recall unless reviewed.
+          </p>
+          <div className="space-y-2">
+            {retentionByArea.map((x) => (
+              <div key={x.name} className="flex items-center gap-3 text-sm">
+                <span className="w-44 flex-shrink-0 truncate text-slate-300">{x.name}</span>
+                <div className="flex-1">
+                  <ProgressBar value={x.r * 100} tone={x.r >= 0.8 ? 'emerald' : x.r >= 0.6 ? 'amber' : 'rose'} />
+                </div>
+                <span className="w-12 text-right text-xs tabular-nums text-slate-400">{Math.round(x.r * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* error taxonomy */}
+      {errRanked.length > 0 && (
+        <Card>
+          <h2 className="mb-1 text-sm font-semibold text-slate-200">Why you miss questions</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            From your one-tap tags on missed questions. Each failure mode has a different cure.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {errRanked.map(([k, n]) => (
+              <div key={k} className="flex items-center justify-between rounded-lg border border-slate-800 px-3 py-2 text-sm">
+                <span className="text-slate-300">{ERROR_LABELS[k] ?? k}</span>
+                <span className="font-bold text-slate-100">{n}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-slate-400">
+            {errRanked[0][0] === 'concept' && 'Concept gaps dominate → prioritize lessons before more drilling.'}
+            {errRanked[0][0] === 'arithmetic' && 'Arithmetic slips dominate → slow down 10% and write intermediate values in MathLab.'}
+            {errRanked[0][0] === 'misread' && 'Misreads dominate → underline the asked quantity and givens before solving.'}
+            {errRanked[0][0] === 'time' && 'Time pressure dominates → run speed drills weekly and bank time on easy questions.'}
+          </p>
+        </Card>
+      )}
 
       {/* per-exam mastery */}
       {EXAMS.map((exam) => {

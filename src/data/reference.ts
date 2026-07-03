@@ -1,4 +1,5 @@
 import type { ExamId, LessonBlock } from '../types';
+import { WRE_REFERENCE } from './reference-wre';
 
 // ---------------------------------------------------------------------------
 // In-app reference handbook. This is an ORIGINAL study compilation of the key
@@ -316,6 +317,7 @@ export const REFERENCE: RefEntry[] = [
       { kind: 'formula', tex: '\\sigma = \\sqrt{\\dfrac{\\sum(x_i-\\bar x)^2}{n-1}},\\qquad \\sigma_{\\bar x}=\\dfrac{\\sigma}{\\sqrt n}', caption: 'Sample standard deviation & of the mean' },
     ],
   },
+  ...WRE_REFERENCE,
 ];
 
 export const REF_CATEGORIES = Array.from(new Set(REFERENCE.map((r) => r.category)));

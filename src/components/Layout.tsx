@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useProgress } from '../store/progress';
+import { CommandPalette } from './CommandPalette';
 
 interface NavItem { to: string; label: string; icon: string; end?: boolean }
 
@@ -24,6 +25,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      <CommandPalette />
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 py-2.5 backdrop-blur md:hidden">
         <div className="flex items-center gap-2">

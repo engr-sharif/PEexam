@@ -3,6 +3,7 @@ import { Blocks } from './Blocks';
 
 const EXAM_SEARCH_CONTEXT: Record<string, string> = {
   'pe-geotech': 'PE exam geotechnical',
+  'pe-wre': 'PE exam water resources environmental',
   'ca-seismic': 'seismic design ASCE 7 PE exam',
   'ca-surveying': 'surveying California PE exam',
 };

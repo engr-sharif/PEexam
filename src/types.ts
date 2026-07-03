@@ -4,7 +4,7 @@
 // plain data so it can be edited without touching app logic.
 // ---------------------------------------------------------------------------
 
-export type ExamId = 'pe-geotech' | 'ca-seismic' | 'ca-surveying';
+export type ExamId = 'pe-geotech' | 'pe-wre' | 'ca-seismic' | 'ca-surveying';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 

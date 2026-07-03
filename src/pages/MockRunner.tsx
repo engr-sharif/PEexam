@@ -4,6 +4,7 @@ import { EXAM_BY_ID, areaById } from '../data/exams';
 import { buildMockExam } from '../lib/analytics';
 import { useProgress } from '../store/progress';
 import { Calculator } from '../components/Calculator';
+import { ExamReferencePanel } from '../components/ExamReferencePanel';
 import { RichText } from '../components/Tex';
 import type { MockResult } from '../store/progress';
 import type { Exam, Question } from '../types';
@@ -20,17 +21,20 @@ export function MockRunner() {
   const addStudyMinutes = useProgress((s) => s.addStudyMinutes);
 
   const count = params.get('count') ? Number(params.get('count')) : undefined;
+  const timeOverride = params.get('time') ? Number(params.get('time')) : undefined;
   const questions = useMemo(
     () => (examId ? buildMockExam(examId, count) : []),
     [examId, count],
   );
 
   // total time = real per-question budget × number of questions
+  // (or an explicit ?time= override for speed drills)
   const totalSeconds = useMemo(() => {
     if (!exam) return 0;
+    if (timeOverride && timeOverride > 0) return timeOverride;
     const perQ = (exam.examMinutes * 60) / exam.questionCount;
     return Math.round(perQ * questions.length);
-  }, [exam, questions.length]);
+  }, [exam, questions.length, timeOverride]);
 
   const [started, setStarted] = useState(false);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
@@ -38,6 +42,11 @@ export function MockRunner() {
   const [cur, setCur] = useState(0);
   const [remaining, setRemaining] = useState(totalSeconds);
   const [showCalc, setShowCalc] = useState(false);
+  const [showRef, setShowRef] = useState(false);
+  const [strikes, setStrikes] = useState<Record<number, Record<number, boolean>>>({});
+  const [onBreak, setOnBreak] = useState(false);
+  const [breakLeft, setBreakLeft] = useState(0);
+  const [breakUsed, setBreakUsed] = useState(false);
   const [result, setResult] = useState<MockResult | null>(null);
   const startTime = useRef(0);
   // Refs mirror state so the countdown's auto-submit sees current values
@@ -50,9 +59,9 @@ export function MockRunner() {
     setRemaining(totalSeconds);
   }, [totalSeconds]);
 
-  // countdown
+  // countdown (paused during the scheduled break, like the real CBT)
   useEffect(() => {
-    if (!started || result) return;
+    if (!started || result || onBreak) return;
     const t = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -65,7 +74,23 @@ export function MockRunner() {
     }, 1000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [started, result]);
+  }, [started, result, onBreak]);
+
+  // break countdown — auto-returns to the exam when it expires
+  useEffect(() => {
+    if (!onBreak) return;
+    const t = setInterval(() => {
+      setBreakLeft((b) => {
+        if (b <= 1) {
+          clearInterval(t);
+          setOnBreak(false);
+          return 0;
+        }
+        return b - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [onBreak]);
 
   if (!exam) return <p>Unknown exam.</p>;
   if (questions.length === 0)
@@ -81,6 +106,9 @@ export function MockRunner() {
     setFlags(new Array(questions.length).fill(false));
     setCur(0);
     setRemaining(totalSeconds);
+    setStrikes({});
+    setBreakUsed(false);
+    setOnBreak(false);
     startTime.current = Date.now();
     finishedRef.current = false;
     setStarted(true);
@@ -161,6 +189,12 @@ export function MockRunner() {
   const q = questions[cur];
   const lowTime = remaining < totalSeconds * 0.1;
   const answeredCount = answers.filter((a) => a !== null).length;
+  // pacing: banked time = time you SHOULD have left at this progress vs actual
+  const perQSec = totalSeconds / questions.length;
+  const expectedRemaining = totalSeconds - answeredCount * perQSec;
+  const bankedSec = Math.round(remaining - expectedRemaining);
+  const halfway = Math.floor(questions.length / 2);
+  const offerBreak = !breakUsed && exam.examMinutes >= 240 && answeredCount >= halfway;
 
   return (
     <div className="space-y-4">
@@ -171,6 +205,7 @@ export function MockRunner() {
           {fmt(remaining)}
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowRef((s) => !s)} className="rounded-lg border border-slate-700 px-3 py-1 text-xs">📖 Reference</button>
           <button onClick={() => setShowCalc((s) => !s)} className="rounded-lg border border-slate-700 px-3 py-1 text-xs">🧮 Calc</button>
           <button onClick={finish} className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">Submit</button>
         </div>
@@ -181,6 +216,44 @@ export function MockRunner() {
           <Calculator onClose={() => setShowCalc(false)} />
         </div>
       )}
+
+      {onBreak && (
+        <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-slate-950/98">
+          <div className="text-5xl">☕</div>
+          <h2 className="mt-3 text-2xl font-bold">Scheduled break</h2>
+          <p className="mt-1 text-sm text-slate-400">Exam clock is paused — just like the real CBT. Stand up, hydrate.</p>
+          <div className="mt-4 font-mono text-4xl font-bold text-amber-300">{fmt(breakLeft)}</div>
+          <button
+            onClick={() => setOnBreak(false)}
+            className="mt-6 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            Return to exam
+          </button>
+        </div>
+      )}
+
+      {showRef && <ExamReferencePanel onClose={() => setShowRef(false)} />}
+
+      {/* pacing bar */}
+      <div className="flex items-center gap-3 text-xs">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
+          <div
+            className="h-full rounded-full bg-brand-500 transition-all"
+            style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+          />
+        </div>
+        <span className={`font-mono font-semibold ${bankedSec >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          {bankedSec >= 0 ? '+' : '−'}{fmt(Math.abs(bankedSec))} banked
+        </span>
+        {offerBreak && (
+          <button
+            onClick={() => { setBreakUsed(true); setBreakLeft(25 * 60); setOnBreak(true); }}
+            className="rounded-lg border border-amber-500/50 px-2 py-1 text-amber-300"
+          >
+            ☕ Take scheduled break
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-4 lg:flex-row">
         <div className="min-w-0 flex-1 space-y-4">
@@ -200,17 +273,32 @@ export function MockRunner() {
               {choiceOrder(q).map((origIdx, dispIdx) => {
                 const choice = q.choices[origIdx];
                 const isChosen = answers[cur] === origIdx;
+                const struck = strikes[cur]?.[origIdx] ?? false;
                 return (
-                  <button
-                    key={origIdx}
-                    onClick={() => setAnswers((a) => a.map((v, idx) => (idx === cur ? origIdx : v)))}
-                    className={`flex w-full items-start gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition ${
-                      isChosen ? 'border-brand-500 bg-brand-500/10' : 'border-slate-700 hover:border-slate-500'
-                    }`}
-                  >
-                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">{LETTERS[dispIdx]}</span>
-                    <RichText html={choice} className="text-slate-200" />
-                  </button>
+                  <div key={origIdx} className="flex items-stretch gap-1.5">
+                    <button
+                      onClick={() => setAnswers((a) => a.map((v, idx) => (idx === cur ? origIdx : v)))}
+                      className={`flex min-w-0 flex-1 items-start gap-3 rounded-lg border px-4 py-2.5 text-left text-sm transition ${
+                        isChosen ? 'border-brand-500 bg-brand-500/10' : 'border-slate-700 hover:border-slate-500'
+                      } ${struck ? 'opacity-40' : ''}`}
+                    >
+                      <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">{LETTERS[dispIdx]}</span>
+                      <span className={struck ? 'line-through decoration-rose-400/70 decoration-2' : ''}>
+                        <RichText html={choice} className="text-slate-200" />
+                      </span>
+                    </button>
+                    <button
+                      title="Strike out this choice (process of elimination)"
+                      onClick={() =>
+                        setStrikes((st) => ({ ...st, [cur]: { ...st[cur], [origIdx]: !struck } }))
+                      }
+                      className={`flex w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs transition ${
+                        struck ? 'border-rose-500/60 text-rose-300' : 'border-slate-800 text-slate-600 hover:border-slate-600 hover:text-slate-300'
+                      }`}
+                    >
+                      ⊘
+                    </button>
+                  </div>
                 );
               })}
             </div>

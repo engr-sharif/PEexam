@@ -144,6 +144,170 @@ const geoAreas: KnowledgeArea[] = [
   },
 ];
 
+// WRE question ranges per the NCEES CBT spec effective April 2024
+// (midpoint used for weighting; the mock sampler normalizes).
+const wreAreas: KnowledgeArea[] = [
+  {
+    id: 'wre-planning',
+    examId: 'pe-wre',
+    name: 'Project Planning',
+    weight: 5 / 80,
+    questionRange: '4–6',
+    subtopics: [
+      'Quantity take-off methods',
+      'Cost estimating',
+      'Project schedules, activity identification & sequencing',
+      'Economic & sustainability analysis (present worth, lifecycle cost)',
+    ],
+  },
+  {
+    id: 'wre-soil',
+    examId: 'pe-wre',
+    name: 'Soil Mechanics',
+    weight: 4 / 80,
+    questionRange: '3–5',
+    subtopics: [
+      'Lateral earth pressure',
+      'Consolidation & compaction',
+      'Bearing capacity & settlement',
+      'Slope stability',
+    ],
+  },
+  {
+    id: 'wre-materials',
+    examId: 'pe-wre',
+    name: 'Materials',
+    weight: 5 / 80,
+    questionRange: '4–6',
+    subtopics: [
+      'Soil classification & boring log interpretation',
+      'Soil properties (strength, permeability, phase relationships)',
+      'Concrete (plain & reinforced)',
+      'Piping materials',
+      'Material test methods & spec conformance',
+    ],
+  },
+  {
+    id: 'wre-analysis',
+    examId: 'pe-wre',
+    name: 'Analysis & Design',
+    weight: 7.5 / 80,
+    questionRange: '6–9',
+    subtopics: [
+      'Mass balance',
+      'Hydraulic loading',
+      'Solids loading (sediment, sludge)',
+      'Hydraulic flow measurement (weirs, flumes, meters)',
+    ],
+  },
+  {
+    id: 'wre-closed',
+    examId: 'pe-wre',
+    name: 'Hydraulics — Closed Conduit',
+    weight: 9 / 80,
+    questionRange: '7–11',
+    subtopics: [
+      'Energy/continuity (Bernoulli, EGL/HGL, momentum)',
+      'Pressure conduits (Hazen-Williams, Darcy-Weisbach, minor losses)',
+      'Pumps: system curves, wet wells, lift stations, cavitation/NPSH',
+      'Pipe networks (series, parallel, loops)',
+    ],
+  },
+  {
+    id: 'wre-open',
+    examId: 'pe-wre',
+    name: 'Hydraulics — Open Channel',
+    weight: 9 / 80,
+    questionRange: '7–11',
+    subtopics: [
+      "Open-channel flow (Manning's equation)",
+      'HGL & energy dissipation (plunge pools, drop structures, culvert outlets)',
+      'Stormwater collection (culverts, inlets, gutter & storm sewer flow)',
+      'Sub/supercritical flow, Froude number, hydraulic jump',
+    ],
+  },
+  {
+    id: 'wre-hydrology',
+    examId: 'pe-wre',
+    name: 'Hydrology',
+    weight: 10 / 80,
+    questionRange: '8–12',
+    subtopics: [
+      'Storm frequency, rainfall measurement & distributions',
+      'Runoff analysis (Rational & NRCS/SCS methods)',
+      'Hydrographs, incl. synthetic (unit hydrograph)',
+      'IDF curves & probability of exceedance',
+      'Time of concentration',
+      'Detention/retention & stormwater management (ponds, swales, wetlands)',
+    ],
+  },
+  {
+    id: 'wre-groundwater',
+    examId: 'pe-wre',
+    name: 'Groundwater & Wells',
+    weight: 5 / 80,
+    questionRange: '4–6',
+    subtopics: ['Aquifers (confined/unconfined)', 'Groundwater flow (Darcy)', 'Well & drawdown analysis'],
+  },
+  {
+    id: 'wre-quality',
+    examId: 'pe-wre',
+    name: 'Surface & Groundwater Quality',
+    weight: 6.5 / 80,
+    questionRange: '5–8',
+    subtopics: [
+      'Stream degradation & oxygen dynamics (DO sag, Streeter-Phelps)',
+      'TMDL & load allocation',
+      'Biological & chemical contaminants (BOD/COD, nutrients, pathogens)',
+    ],
+  },
+  {
+    id: 'wre-drinking',
+    examId: 'pe-wre',
+    name: 'Drinking Water Distribution & Treatment',
+    weight: 7.5 / 80,
+    questionRange: '6–9',
+    subtopics: [
+      'Distribution systems, demand & storage',
+      'Coagulation/flocculation & sedimentation',
+      'Filtration & membranes',
+      'Disinfection & DBPs (CT concept)',
+      'Hardness/softening, ion exchange, adsorption, UV/ozone',
+    ],
+  },
+  {
+    id: 'wre-wastewater',
+    examId: 'pe-wre',
+    name: 'Wastewater Collection & Treatment',
+    weight: 9 / 80,
+    questionRange: '7–11',
+    subtopics: [
+      'Collection systems (lift stations, I/I, odor control)',
+      'Preliminary & primary treatment',
+      'Secondary treatment (activated sludge, trickling filters)',
+      'Nutrient removal (N & P)',
+      'Solids handling & disinfection',
+      'Advanced treatment & water reuse',
+    ],
+  },
+  {
+    id: 'wre-sitework',
+    examId: 'pe-wre',
+    name: 'Project Sitework',
+    weight: 11.5 / 80,
+    questionRange: '9–14',
+    subtopics: [
+      'Excavation & embankment (grading, cut/fill)',
+      'Site layout & construction control',
+      'Erosion & sediment control (permits, sediment transport, outlet protection)',
+      'Impacts on adjacent facilities',
+      'Safety (construction, roadside, work zone)',
+      'Basic horizontal & vertical curves',
+      'Retaining walls & construction methods',
+    ],
+  },
+];
+
 const seismicAreas: KnowledgeArea[] = [
   {
     id: 'seis-data',
@@ -308,6 +472,27 @@ export const EXAMS: Exam[] = [
       'UFC 3-220-05 / 3-220-10 — Dewatering & Soil Mechanics',
     ],
     areas: geoAreas,
+  },
+  {
+    id: 'pe-wre',
+    name: 'PE Civil — Water Resources & Environmental Depth (NCEES)',
+    shortName: 'PE WRE',
+    authority: 'NCEES',
+    questionCount: 80,
+    examMinutes: 480,
+    appointmentNote:
+      '9-hour appointment: nondisclosure + tutorial + 8 h testing + one optional 25-min break. Depth-only (all 80 questions are water resources & environmental).',
+    passNote:
+      'Pass/fail by NCEES cut score (≈ 53–58% correct in recent administrations; not published exactly). Aim for ≥ 70% in practice.',
+    color: 'sky',
+    blurb:
+      'The national PE Civil computer-based exam in the Water Resources & Environmental depth. Closed book with the searchable NCEES PE Civil Reference Handbook plus the Ten States Standards provided on-screen.',
+    references: [
+      'NCEES PE Civil Reference Handbook (provided on exam)',
+      'Recommended Standards for Wastewater Facilities (Ten States Standards), 2014',
+      'Recommended Standards for Water Works (Ten States Standards), 2018',
+    ],
+    areas: wreAreas,
   },
   {
     id: 'ca-seismic',

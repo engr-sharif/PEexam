@@ -5,7 +5,7 @@ import { useProgress } from '../store/progress';
 import { Card, Pill } from '../components/ui';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function MockList() {
   const mocks = useProgress((s) => s.mocks);
@@ -20,7 +20,7 @@ export function MockList() {
         </p>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {EXAMS.map((e) => {
           const bank = QUESTIONS.filter((q) => q.examId === e.id).length;
           const perQ = Math.round(e.examMinutes / e.questionCount);
@@ -46,6 +46,12 @@ export function MockList() {
                   className="rounded-lg border border-slate-700 px-4 py-2 text-center text-sm font-semibold text-slate-200 hover:border-slate-500"
                 >
                   Full blueprint ({Math.min(bank, e.questionCount)} Q)
+                </Link>
+                <Link
+                  to={`/mock/${e.id}?count=10&time=900`}
+                  className="rounded-lg border border-amber-600/40 px-4 py-2 text-center text-sm font-semibold text-amber-300 hover:border-amber-500"
+                >
+                  ⚡ Speed drill — 10 Q / 15 min
                 </Link>
               </div>
             </Card>

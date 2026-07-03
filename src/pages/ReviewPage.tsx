@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { QUESTIONS, QUESTION_BY_ID } from '../data/questions';
 import { areaById, EXAM_BY_ID } from '../data/exams';
 import { useProgress } from '../store/progress';
-import { isDue } from '../lib/srs';
+import { fsrsIsDue as isDue } from '../lib/fsrs';
 import { QuestionCard } from '../components/QuestionCard';
 import { RichText } from '../components/Tex';
 import { Card, Pill } from '../components/ui';
@@ -11,7 +11,7 @@ import { shuffle } from '../lib/analytics';
 import type { Question } from '../types';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 /** Questions whose LATEST attempt was wrong — your active error log. */
 function useMissed(): Question[] {

@@ -6,8 +6,16 @@ import { SolutionSteps } from './Blocks';
 import { lessonsForArea } from '../data/lessons';
 import { areaById } from '../data/exams';
 import { choiceOrder, answerLetter } from '../lib/choiceOrder';
+import { useProgress, type ErrorType } from '../store/progress';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+const ERROR_TAGS: { key: ErrorType; label: string; hint: string }[] = [
+  { key: 'concept', label: '🧠 Concept gap', hint: 'didn’t know the method' },
+  { key: 'arithmetic', label: '🔢 Arithmetic slip', hint: 'knew it, botched the math' },
+  { key: 'misread', label: '👁 Misread', hint: 'missed a given or the ask' },
+  { key: 'time', label: '⏱ Rushed', hint: 'time pressure' },
+];
 
 export function QuestionCard({
   q,
@@ -25,13 +33,16 @@ export function QuestionCard({
   const [chosen, setChosen] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [showWork, setShowWork] = useState(false);
+  const [tagged, setTagged] = useState<ErrorType | null>(null);
   const [start, setStart] = useState(() => Date.now());
+  const tagAttemptError = useProgress((s) => s.tagAttemptError);
 
   // reset when question changes
   useEffect(() => {
     setChosen(null);
     setRevealed(false);
     setShowWork(false);
+    setTagged(null);
     setStart(Date.now());
   }, [q.id]);
 
@@ -110,6 +121,34 @@ export function QuestionCard({
                   <span className="text-xs text-slate-400">{showWork ? 'hide' : 'show'}</span>
                 </button>
                 {showWork && <SolutionSteps steps={q.solution} />}
+              </div>
+            )}
+
+            {/* Failure-mode tagging — teaches the engine WHY you miss */}
+            {!correct && (
+              <div className="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
+                <div className="mb-2 text-xs font-semibold text-slate-300">
+                  {tagged ? 'Tagged — I’ll use this to coach you.' : 'Why did you miss it? (one tap — improves your coaching)'}
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                  {ERROR_TAGS.map((t) => (
+                    <button
+                      key={t.key}
+                      onClick={() => {
+                        setTagged(t.key);
+                        tagAttemptError(q.id, t.key);
+                      }}
+                      title={t.hint}
+                      className={`rounded-lg border px-2 py-1.5 text-xs transition ${
+                        tagged === t.key
+                          ? 'border-brand-500 bg-brand-600/20 text-brand-200'
+                          : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

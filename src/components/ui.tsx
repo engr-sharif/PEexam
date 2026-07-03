@@ -14,6 +14,7 @@ export function Pill({ children, tone = 'slate' }: { children: ReactNode; tone?:
     amber: 'bg-amber-500/15 text-amber-300',
     rose: 'bg-rose-500/15 text-rose-300',
     emerald: 'bg-emerald-500/15 text-emerald-300',
+    sky: 'bg-sky-500/15 text-sky-300',
     brand: 'bg-brand-500/15 text-brand-300',
   };
   return (
@@ -29,6 +30,7 @@ export function ProgressBar({ value, tone = 'brand' }: { value: number; tone?: s
     amber: 'bg-amber-500',
     rose: 'bg-rose-500',
     emerald: 'bg-emerald-500',
+    sky: 'bg-sky-500',
   };
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">

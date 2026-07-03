@@ -2,7 +2,9 @@ import { useRef, useState } from 'react';
 import { EXAMS } from '../data/exams';
 import { useProgress } from '../store/progress';
 import { buildStudyPlanIcs, downloadIcs } from '../lib/ics';
-import { Card } from '../components/ui';
+import { getActiveProfile, listProfiles, switchProfile, createProfile, displayName } from '../lib/profile';
+import { loadCred, saveCred, saveToGist, loadFromGist } from '../lib/gistSync';
+import { Card, Pill } from '../components/ui';
 
 export function Settings() {
   const { settings, updateSettings, exportState, importState, resetAll } = useProgress();
@@ -10,6 +12,38 @@ export function Settings() {
   const [msg, setMsg] = useState('');
   const [weeklyHours, setWeeklyHours] = useState(10);
   const [daysPerWeek, setDaysPerWeek] = useState(4);
+  const [newProfile, setNewProfile] = useState('');
+  const [cred, setCred] = useState(loadCred);
+  const [syncBusy, setSyncBusy] = useState(false);
+
+  const doCloudSave = async () => {
+    setSyncBusy(true);
+    try {
+      const id = await saveToGist(cred.token.trim(), cred.gistId.trim(), exportState());
+      const next = { ...cred, gistId: id };
+      setCred(next);
+      saveCred(next);
+      setMsg(`Saved to GitHub ✓ (gist ${id.slice(0, 8)}…)`);
+    } catch (e) {
+      setMsg(`Cloud save failed: ${e instanceof Error ? e.message : 'error'}`);
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  const doCloudLoad = async () => {
+    if (!confirm('Load from GitHub and REPLACE this profile’s local progress?')) return;
+    setSyncBusy(true);
+    try {
+      const json = await loadFromGist(cred.token.trim(), cred.gistId.trim());
+      saveCred(cred);
+      setMsg(importState(json) ? 'Loaded from GitHub ✓' : 'Load failed — bad data.');
+    } catch (e) {
+      setMsg(`Cloud load failed: ${e instanceof Error ? e.message : 'error'}`);
+    } finally {
+      setSyncBusy(false);
+    }
+  };
 
   const downloadCalendar = () => {
     const ics = buildStudyPlanIcs({
@@ -49,6 +83,43 @@ export function Settings() {
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-sm text-slate-400">Your progress is stored in this browser. Back it up to move devices.</p>
       </header>
+
+      <Card>
+        <h2 className="mb-1 text-sm font-semibold text-slate-200">Profiles</h2>
+        <p className="mb-3 text-xs text-slate-400">
+          Each profile keeps completely separate progress on this device — perfect for two people sharing the app.
+          Active: <Pill tone="brand">{displayName(getActiveProfile())}</Pill>
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {listProfiles().map((p) => (
+            <button
+              key={p}
+              onClick={() => p !== getActiveProfile() && switchProfile(p)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                p === getActiveProfile()
+                  ? 'border-brand-500 bg-brand-600/20 text-brand-200'
+                  : 'border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              👤 {displayName(p)}
+            </button>
+          ))}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <input
+            value={newProfile}
+            onChange={(e) => setNewProfile(e.target.value)}
+            placeholder="New profile name (e.g. Faiza)"
+            className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+          />
+          <button
+            onClick={() => newProfile.trim() && createProfile(newProfile)}
+            className="flex-shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"
+          >
+            Create & switch
+          </button>
+        </div>
+      </Card>
 
       <Card>
         <h2 className="mb-3 text-sm font-semibold text-slate-200">Study preferences</h2>
@@ -146,6 +217,46 @@ export function Settings() {
           <input ref={fileRef} type="file" accept="application/json" onChange={onImport} className="hidden" />
         </div>
         {msg && <p className="mt-2 text-xs text-emerald-400">{msg}</p>}
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-sm font-semibold text-slate-200">Cloud sync — GitHub</h2>
+        <p className="mb-3 text-xs text-slate-400">
+          Back up this profile’s progress to a <b>private GitHub Gist</b> and load it on any device (e.g. laptop ↔ phone).
+          Create a token at github.com → Settings → Developer settings → Personal access tokens with <b>only the “gist” scope</b>.
+          The token is stored in this browser only and is never included in exports.
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <input
+            type="password"
+            value={cred.token}
+            onChange={(e) => setCred({ ...cred, token: e.target.value })}
+            placeholder="GitHub token (gist scope)"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+          />
+          <input
+            value={cred.gistId}
+            onChange={(e) => setCred({ ...cred, gistId: e.target.value })}
+            placeholder="Gist ID (blank = create new on save)"
+            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            onClick={doCloudSave}
+            disabled={syncBusy || !cred.token.trim()}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          >
+            {syncBusy ? 'Working…' : '☁ Save to GitHub'}
+          </button>
+          <button
+            onClick={doCloudLoad}
+            disabled={syncBusy || !cred.token.trim() || !cred.gistId.trim()}
+            className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 disabled:opacity-40"
+          >
+            ⤓ Load from GitHub
+          </button>
+        </div>
       </Card>
 
       <Card>

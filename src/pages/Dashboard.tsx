@@ -14,7 +14,7 @@ function daysUntil(dateStr?: string): number | null {
 }
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function Dashboard() {
   const { attempts, lessons, cards, settings, streak, mocks } = useProgress();
@@ -35,7 +35,7 @@ export function Dashboard() {
       <header>
         <h1 className="text-2xl font-bold">Welcome back 👋</h1>
         <p className="text-sm text-slate-400">
-          Your personalized path to California PE Civil licensure — Geotechnical depth, Seismic, and Surveying.
+          Your personalized path to California engineering licensure — FE Civil through PE (Geotech or WRE depth), Seismic, and Surveying.
         </p>
       </header>
 

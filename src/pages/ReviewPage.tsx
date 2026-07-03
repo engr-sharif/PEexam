@@ -11,7 +11,7 @@ import { shuffle } from '../lib/analytics';
 import type { Question } from '../types';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 /** Questions whose LATEST attempt was wrong — your active error log. */
 function useMissed(): Question[] {

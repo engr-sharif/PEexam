@@ -8,7 +8,7 @@ import { QuestionCard } from '../components/QuestionCard';
 import { Card, Pill, ProgressBar } from '../components/ui';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 /** 12-question placement quiz: 4 per exam, spread across areas & difficulties. */
 function buildDiagnostic() {

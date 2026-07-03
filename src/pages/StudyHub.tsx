@@ -6,7 +6,7 @@ import { computeAreaMastery, competency } from '../lib/analytics';
 import { Card, Pill, ProgressBar } from '../components/ui';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function StudyHub() {
   const { examId } = useParams();

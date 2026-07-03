@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { FsrsCard } from '../lib/fsrs';
 import { newFsrsCard, reviewFsrs } from '../lib/fsrs';
+import { getActiveProfile, storageKeyFor } from '../lib/profile';
 
 /** Convert a legacy SM-2 card (pre-FSRS) into an FSRS card on the fly. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,6 +256,6 @@ export const useProgress = create<ProgressState>()(
         }
       },
     }),
-    { name: 'ca-pe-prep-progress' },
+    { name: storageKeyFor(getActiveProfile()) },
   ),
 );

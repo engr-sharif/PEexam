@@ -22,7 +22,7 @@ export interface SolverStep {
 
 export interface Solver {
   id: string;
-  category: 'Geotechnical' | 'Water/Enviro' | 'Seismic' | 'Surveying';
+  category: 'FE Fundamentals' | 'Geotechnical' | 'Water/Enviro' | 'Seismic' | 'Surveying';
   title: string;
   description: string;
   inputs: SolverInput[];
@@ -34,6 +34,98 @@ const r = (n: number, d = 3) =>
 const DEG = Math.PI / 180;
 
 export const SOLVERS: Solver[] = [
+
+  // ------------------------------ FE FUNDAMENTALS ------------------------------
+  {
+    id: 'sv-tvm',
+    category: 'FE Fundamentals',
+    title: 'Time value of money',
+    description: 'All six compound-interest factors from i and n, applied to your P, A, or F.',
+    inputs: [
+      { key: 'i', label: 'Interest rate i', unit: '%', default: 6, min: 0.25, max: 25, step: 0.25 },
+      { key: 'n', label: 'Periods n', default: 10, min: 1, max: 60, step: 1 },
+      { key: 'amt', label: 'Amount (P, A, or F)', unit: '$', default: 10000, min: 1, max: 10000000, step: 100 },
+    ],
+    compute: ({ i, n, amt }) => {
+      const r_ = i / 100;
+      const fp = Math.pow(1 + r_, n);
+      const pa = (fp - 1) / (r_ * fp);
+      const af = r_ / (fp - 1);
+      return [
+        { label: 'Single-payment factors', tex: `(F/P) = (1+i)^n = ${r(fp, 4)};\\qquad (P/F) = ${r(1 / fp, 4)}` },
+        { label: 'Uniform-series factors', tex: `(P/A) = \\dfrac{(1+i)^n - 1}{i(1+i)^n} = ${r(pa, 4)};\\quad (A/P) = ${r(1 / pa, 4)};\\quad (A/F) = ${r(af, 4)};\\quad (F/A) = ${r((fp - 1) / r_, 4)}` },
+        { label: 'Applied to your amount', tex: `F = P(F/P) = ${r(amt * fp)};\\quad P = A(P/A) = ${r(amt * pa)};\\quad A = F(A/F) = ${r(amt * af)}`, value: `F/P=${r(fp,4)} · P/A=${r(pa,4)} · A/P=${r(1/pa,4)}` },
+      ];
+    },
+  },
+  {
+    id: 'sv-beam',
+    category: 'FE Fundamentals',
+    title: 'Simply supported beam (UDL)',
+    description: 'Reactions, max shear/moment, and midspan deflection for a uniform load.',
+    inputs: [
+      { key: 'w', label: 'Load w', unit: 'kip/ft', default: 2, min: 0.1, max: 20, step: 0.1 },
+      { key: 'L', label: 'Span L', unit: 'ft', default: 24, min: 4, max: 100, step: 1 },
+      { key: 'E', label: 'E', unit: 'ksi', default: 29000, min: 1000, max: 30000, step: 500 },
+      { key: 'I', label: 'I', unit: 'in⁴', default: 800, min: 10, max: 20000, step: 10 },
+    ],
+    compute: ({ w, L, E, I }) => {
+      const Rv = (w * L) / 2;
+      const M = (w * L * L) / 8;
+      const defl = (5 * (w / 12) * Math.pow(L * 12, 4)) / (384 * E * I);
+      const limit = (L * 12) / 360;
+      return [
+        { label: 'Reactions & max shear', tex: `R = V_{max} = \\dfrac{wL}{2} = ${r(Rv)}\\ \\text{kip}` },
+        { label: 'Max moment (midspan)', tex: `M_{max} = \\dfrac{wL^2}{8} = ${r(M)}\\ \\text{kip·ft}` },
+        { label: 'Midspan deflection', tex: `\\delta = \\dfrac{5wL^4}{384EI} = ${r(defl, 3)}\\ \\text{in}`, value: `δ = ${r(defl, 3)} in vs L/360 = ${r(limit, 3)} in ${defl <= limit ? '✓' : '✗ exceeds'}` },
+      ];
+    },
+  },
+  {
+    id: 'sv-principal',
+    category: 'FE Fundamentals',
+    title: 'Principal stresses (plane stress)',
+    description: 'Principal stresses, max shear, and orientation from σx, σy, τxy.',
+    inputs: [
+      { key: 'sx', label: 'σx', unit: 'ksi', default: 12, min: -50, max: 50, step: 1 },
+      { key: 'sy', label: 'σy', unit: 'ksi', default: -4, min: -50, max: 50, step: 1 },
+      { key: 'txy', label: 'τxy', unit: 'ksi', default: 6, min: -30, max: 30, step: 1 },
+    ],
+    compute: ({ sx, sy, txy }) => {
+      const avg = (sx + sy) / 2;
+      const Rm = Math.hypot((sx - sy) / 2, txy);
+      const th = (0.5 * Math.atan2(2 * txy, sx - sy) * 180) / Math.PI;
+      return [
+        { label: 'Center & radius of the Mohr circle', tex: `\\sigma_{avg} = ${r(avg)};\\qquad R = \\sqrt{\\left(\\tfrac{\\sigma_x-\\sigma_y}{2}\\right)^2 + \\tau_{xy}^2} = ${r(Rm)}\\ \\text{ksi}` },
+        { label: 'Principal stresses', tex: `\\sigma_{1,2} = \\sigma_{avg} \\pm R = ${r(avg + Rm)},\\ ${r(avg - Rm)}\\ \\text{ksi}`, value: `σ1 = ${r(avg + Rm)} · σ2 = ${r(avg - Rm)} · τmax = ${r(Rm)} ksi` },
+        { label: 'Max in-plane shear & orientation', tex: `\\tau_{max} = R = ${r(Rm)}\\ \\text{ksi at } \\theta_p = ${r(th)}^\\circ` },
+      ];
+    },
+  },
+  {
+    id: 'sv-euler',
+    category: 'FE Fundamentals',
+    title: 'Euler column buckling',
+    description: 'Critical load and stress with the effective length factor K.',
+    inputs: [
+      { key: 'E', label: 'E', unit: 'ksi', default: 29000, min: 1000, max: 30000, step: 500 },
+      { key: 'I', label: 'I (weak axis)', unit: 'in⁴', default: 40, min: 1, max: 5000, step: 1 },
+      { key: 'A', label: 'Area', unit: 'in²', default: 8, min: 0.5, max: 200, step: 0.5 },
+      { key: 'L', label: 'Length', unit: 'ft', default: 16, min: 2, max: 60, step: 1 },
+      { key: 'K', label: 'K (1=pin-pin, 0.5=fix-fix, 2=fix-free)', default: 1, min: 0.5, max: 2.1, step: 0.05 },
+    ],
+    compute: ({ E, I, A, L, K }) => {
+      const Lin = L * 12;
+      const Pcr = (Math.PI ** 2 * E * I) / Math.pow(K * Lin, 2);
+      const rg = Math.sqrt(I / A);
+      const sr = (K * Lin) / rg;
+      return [
+        { label: 'Critical buckling load', tex: `P_{cr} = \\dfrac{\\pi^2 EI}{(KL)^2} = \\dfrac{\\pi^2(${r(E)})(${r(I)})}{(${r(K)}\\times${r(Lin)})^2} = \\mathbf{${r(Pcr)}}\\ \\text{kip}`, value: `Pcr = ${r(Pcr)} kip` },
+        { label: 'Critical stress & slenderness', tex: `\\sigma_{cr} = P_{cr}/A = ${r(Pcr / A)}\\ \\text{ksi};\\qquad KL/r = ${r(sr)}` },
+        { label: sr > 200 ? '⚠ KL/r > 200 — beyond typical design limits.' : 'Slenderness within typical limits.' },
+      ];
+    },
+  },
   // ------------------------------ GEOTECH ------------------------------
   {
     id: 'sv-effective-stress',
@@ -521,4 +613,4 @@ export const SOLVERS: Solver[] = [
   },
 ];
 
-export const SOLVER_CATEGORIES = ['Geotechnical', 'Water/Enviro', 'Seismic', 'Surveying'] as const;
+export const SOLVER_CATEGORIES = ['FE Fundamentals', 'Geotechnical', 'Water/Enviro', 'Seismic', 'Surveying'] as const;

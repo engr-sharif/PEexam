@@ -6,6 +6,7 @@ California-specific exams:
 
 | Exam | Authority | Format |
 |------|-----------|--------|
+| **FE Civil (EIT)** | NCEES | 110 questions · 6-hour appointment |
 | **PE Civil — Geotechnical depth** | NCEES | 80 questions · 9-hour appointment |
 | **PE Civil — Water Resources & Environmental depth** | NCEES | 80 questions · 9-hour appointment |
 | **CA Civil Seismic Principles** | BPELSG (Prometric) | 55 questions · 2.5 hours |
@@ -35,6 +36,19 @@ before your exam date.**
 - **Settings** — export/import your progress as JSON to move between devices; reset.
 
 All progress is stored in your browser (`localStorage`). No account, no server.
+
+## Multiple users & cloud sync
+
+- **Profiles** (Settings → Profiles): each person gets a fully separate progress
+  store on the same device — create a profile per user and switch anytime.
+- **Cloud sync** (Settings → Cloud sync): back up a profile's progress to a
+  **private GitHub Gist** and load it on any other device (phone ↔ laptop).
+  Use a personal access token with only the `gist` scope; it stays in the
+  browser and is never included in exports.
+- **Give someone their own copy**: fork or copy this repo to their GitHub
+  account, enable Pages (Settings → Pages → Source: GitHub Actions), and the
+  deploy workflow publishes automatically — the base path is derived from the
+  repo name, so no code changes are needed.
 
 ## A note on questions
 

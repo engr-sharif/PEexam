@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useProgress } from '../store/progress';
 import { CommandPalette } from './CommandPalette';
+import { getActiveProfile, displayName } from '../lib/profile';
 
 interface NavItem { to: string; label: string; icon: string; end?: boolean }
 
@@ -53,8 +54,8 @@ export function Layout() {
           <div className="mb-5 flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-bold">CA</div>
             <div>
-              <div className="text-sm font-bold leading-tight">PE Civil Prep</div>
-              <div className="text-[11px] text-slate-400">California licensure</div>
+              <div className="text-sm font-bold leading-tight">CA Engineer Prep</div>
+              <div className="text-[11px] text-slate-400">FE + PE · {displayName(getActiveProfile())}</div>
             </div>
           </div>
           <nav className="grid gap-1">

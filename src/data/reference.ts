@@ -1,5 +1,6 @@
 import type { ExamId, LessonBlock } from '../types';
 import { WRE_REFERENCE } from './reference-wre';
+import { FE_REFERENCE } from './reference-fe';
 
 // ---------------------------------------------------------------------------
 // In-app reference handbook. This is an ORIGINAL study compilation of the key
@@ -318,6 +319,7 @@ export const REFERENCE: RefEntry[] = [
     ],
   },
   ...WRE_REFERENCE,
+  ...FE_REFERENCE,
 ];
 
 export const REF_CATEGORIES = Array.from(new Set(REFERENCE.map((r) => r.category)));

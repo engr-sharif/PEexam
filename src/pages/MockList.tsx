@@ -5,7 +5,7 @@ import { useProgress } from '../store/progress';
 import { Card, Pill } from '../components/ui';
 
 const toneFor = (id: string) =>
-  id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
+  id === 'fe-civil' ? 'violet' : id === 'pe-geotech' ? 'amber' : id === 'pe-wre' ? 'sky' : id === 'ca-seismic' ? 'rose' : 'emerald';
 
 export function MockList() {
   const mocks = useProgress((s) => s.mocks);

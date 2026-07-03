@@ -144,6 +144,67 @@ const geoAreas: KnowledgeArea[] = [
   },
 ];
 
+// FE Civil per the NCEES CBT spec effective July 2020 (current).
+// 110 questions, 14 knowledge areas; midpoints used for weighting.
+const feAreas: KnowledgeArea[] = [
+  {
+    id: 'fe-math', examId: 'fe-civil', name: 'Mathematics & Statistics', weight: 10 / 110, questionRange: '8–12',
+    subtopics: ['Analytic geometry', 'Single-variable calculus', 'Vector operations', 'Statistics (distributions, mean/SD, regression, confidence intervals)'],
+  },
+  {
+    id: 'fe-ethics', examId: 'fe-civil', name: 'Ethics & Professional Practice', weight: 5 / 110, questionRange: '4–6',
+    subtopics: ['Codes of ethics (NCEES/NSPE model rules)', 'Professional liability', 'Licensure', 'Contracts & contract law'],
+  },
+  {
+    id: 'fe-econ', examId: 'fe-civil', name: 'Engineering Economics', weight: 6.5 / 110, questionRange: '5–8',
+    subtopics: ['Time value of money (P, F, A, rate of return)', 'Cost types (fixed, variable, sunk, incremental)', 'Break-even, benefit-cost, life cycle', 'Uncertainty & expected value'],
+  },
+  {
+    id: 'fe-statics', examId: 'fe-civil', name: 'Statics', weight: 10 / 110, questionRange: '8–12',
+    subtopics: ['Resultants & equivalent force systems', 'Equilibrium of rigid bodies', 'Frames & trusses (method of joints/sections)', 'Centroids & area moments of inertia', 'Static friction'],
+  },
+  {
+    id: 'fe-dynamics', examId: 'fe-civil', name: 'Dynamics', weight: 5 / 110, questionRange: '4–6',
+    subtopics: ['Kinematics (particles, rigid bodies)', 'Mass moments of inertia', 'Newton’s second law (F = ma)', 'Work, energy & power'],
+  },
+  {
+    id: 'fe-mom', examId: 'fe-civil', name: 'Mechanics of Materials', weight: 9 / 110, questionRange: '7–11',
+    subtopics: ['Shear & moment diagrams', 'Axial/torsion/bending/shear/thermal stresses & strains', 'Deformations', "Combined & principal stresses, Mohr's circle"],
+  },
+  {
+    id: 'fe-materials', examId: 'fe-civil', name: 'Materials', weight: 6.5 / 110, questionRange: '5–8',
+    subtopics: ['Concrete & asphalt mix design', 'Test methods & specs (metals, concrete, aggregates, asphalt, wood)', 'Physical & mechanical properties'],
+  },
+  {
+    id: 'fe-fluids', examId: 'fe-civil', name: 'Fluid Mechanics', weight: 7.5 / 110, questionRange: '6–9',
+    subtopics: ['Flow measurement', 'Fluid properties (viscosity, density, surface tension)', 'Fluid statics (pressure, forces on gates, buoyancy)', 'Energy, impulse & momentum'],
+  },
+  {
+    id: 'fe-surveying', examId: 'fe-civil', name: 'Surveying', weight: 7.5 / 110, questionRange: '6–9',
+    subtopics: ['Angles, distances & trigonometry', 'Area computations', 'Earthwork & volumes', 'Coordinate systems', 'Leveling & percent grades'],
+  },
+  {
+    id: 'fe-wre', examId: 'fe-civil', name: 'Water Resources & Environmental', weight: 12.5 / 110, questionRange: '10–15',
+    subtopics: ['Hydrology (rainfall, runoff, watersheds)', 'Hydraulics (Manning, Bernoulli, open channel)', 'Pumps & distribution systems', 'Stormwater, flood control & collection systems', 'Groundwater & wells', 'Water quality & treatment'],
+  },
+  {
+    id: 'fe-structural', examId: 'fe-civil', name: 'Structural Engineering', weight: 12.5 / 110, questionRange: '10–15',
+    subtopics: ['Determinate beams, trusses & frames (analysis & deflection)', 'Column buckling', 'Determinacy & stability', 'Loads, combinations & tributary areas', 'Steel & reinforced-concrete component design basics'],
+  },
+  {
+    id: 'fe-geotech', examId: 'fe-civil', name: 'Geotechnical Engineering', weight: 12.5 / 110, questionRange: '10–15',
+    subtopics: ['Index properties & classification', 'Phase relations', 'Effective stress', 'Shear strength & bearing capacity', 'Retaining structures & slope stability', 'Consolidation & foundation types'],
+  },
+  {
+    id: 'fe-transport', examId: 'fe-civil', name: 'Transportation Engineering', weight: 11.5 / 110, questionRange: '9–14',
+    subtopics: ['Geometric design (horizontal/vertical curves, sight distance)', 'Pavement design basics', 'Traffic capacity & flow theory', 'Traffic control devices (MUTCD)', 'Transportation planning & safety'],
+  },
+  {
+    id: 'fe-construction', examId: 'fe-civil', name: 'Construction Engineering', weight: 10 / 110, questionRange: '8–12',
+    subtopics: ['Project administration & delivery methods', 'Construction operations, safety & productivity', 'Project controls (CPM, earned value)', 'Estimating', 'Engineering drawings'],
+  },
+];
+
 // WRE question ranges per the NCEES CBT spec effective April 2024
 // (midpoint used for weighting; the mock sampler normalizes).
 const wreAreas: KnowledgeArea[] = [
@@ -447,6 +508,26 @@ const surveyingAreas: KnowledgeArea[] = [
 ];
 
 export const EXAMS: Exam[] = [
+  {
+    id: 'fe-civil',
+    name: 'FE Civil (NCEES) — EIT / Fundamentals',
+    shortName: 'FE Civil',
+    authority: 'NCEES',
+    questionCount: 110,
+    examMinutes: 320, // 5 h 20 m of testing within the 6-hour appointment
+    appointmentNote:
+      '6-hour appointment: nondisclosure + tutorial + 5 h 20 m testing + one optional 25-min break. 110 questions across 14 knowledge areas. Passing the FE earns EIT certification (in California, apply to BPELSG after passing).',
+    passNote:
+      'Pass/fail by NCEES scaled scoring (commonly reported around ~50–60% correct). FE questions are single-concept and fast — budget ~2.9 minutes each. Aim for ≥ 70% in practice.',
+    color: 'violet',
+    blurb:
+      'The Fundamentals of Engineering exam — the first step to PE licensure. Closed book with the searchable NCEES FE Reference Handbook on screen; breadth over depth across all of civil engineering.',
+    references: [
+      'NCEES FE Reference Handbook (free from your MyNCEES account; provided on exam)',
+      'Only NCEES-approved calculators allowed (e.g., TI-36X Pro, Casio fx-115/991)',
+    ],
+    areas: feAreas,
+  },
   {
     id: 'pe-geotech',
     name: 'PE Civil — Geotechnical Depth (NCEES)',

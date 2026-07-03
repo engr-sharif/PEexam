@@ -1,5 +1,6 @@
 import type { Flashcard } from '../types';
 import { WRE_FLASHCARDS } from './flashcards-wre';
+import { FE_FLASHCARDS } from './flashcards-fe';
 
 // Key formulas & facts for spaced-repetition review. Fronts/backs accept $tex$.
 export const FLASHCARDS: Flashcard[] = [
@@ -42,4 +43,5 @@ export const FLASHCARDS: Flashcard[] = [
   { id: 'fc-surv-8', examId: 'ca-surveying', areaId: 'surv-topo', front: 'Latitude & departure', back: '$lat=L\\cos(Az),\\ dep=L\\sin(Az)$' },
   { id: 'fc-surv-9', examId: 'ca-surveying', areaId: 'surv-reports', front: 'PLSS section area', back: '1 section = 1 mi² = 640 acres' },
   ...WRE_FLASHCARDS,
+  ...FE_FLASHCARDS,
 ];
